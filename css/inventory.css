@@ -205,20 +205,23 @@
   cursor: default;
 }
 
-/* Compact view: name + sub + percentage + mini bar */
+/* Compact view: name + sub + inline +/- percentage + mini bar */
 .inv-item-compact {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
+  display: grid;
+  grid-template-columns: 1fr auto;
   gap: 2px 8px;
+  align-items: center;
+}
+
+.inv-item-info {
+  min-width: 0;
+  cursor: pointer;
 }
 
 .inv-item-name {
   font-size: 0.8rem;
   color: var(--text-primary);
   font-weight: 500;
-  flex: 1;
-  min-width: 60px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -227,26 +230,55 @@
 .inv-item-sub {
   font-size: 0.65rem;
   color: var(--text-muted);
-  flex-basis: 100%;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.inv-item-controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.inv-pct-btn {
+  width: 24px;
+  height: 24px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--gold-dim);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.inv-pct-btn:hover,
+.inv-pct-btn:active {
+  color: var(--gold);
+  border-color: var(--gold);
+  background: var(--gold-dim);
 }
 
 .inv-item-pct {
   font-size: 0.75rem;
   font-weight: 700;
   min-width: 32px;
-  text-align: right;
+  text-align: center;
 }
 
 .inv-mini-bar {
-  flex-basis: 100%;
+  grid-column: 1 / -1;
   height: 4px;
   background: var(--bg-tertiary);
   border-radius: 2px;
   overflow: hidden;
-  margin-top: 4px;
+  margin-top: 2px;
 }
 
 .inv-mini-fill {

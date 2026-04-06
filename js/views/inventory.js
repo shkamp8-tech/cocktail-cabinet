@@ -89,10 +89,9 @@ const InventoryView = (() => {
             <input type="text" id="inv-search" class="inv-search" placeholder="Search inventory..." value="${searchTerm}">
           </div>
           <div class="inv-stock-filters">
-            <button class="inv-stock-chip${stockFilter === '' ? ' active' : ''}" data-stock="">All</button>
+            <button class="inv-stock-chip${stockFilter === '' ? ' active' : ''}" data-stock="">Alles</button>
             <button class="inv-stock-chip${stockFilter === 'low' ? ' active' : ''}" data-stock="low">⚠ Bijhalen</button>
-            <button class="inv-stock-chip${stockFilter === 'empty' ? ' active' : ''}" data-stock="empty">Leeg</button>
-            <button class="inv-stock-chip${stockFilter === 'full' ? ' active' : ''}" data-stock="full">Vol</button>
+            <button class="inv-stock-chip${stockFilter === 'almost' ? ' active' : ''}" data-stock="almost">Bijna leeg</button>
           </div>
           ${catNav ? `<div class="inv-cat-nav">${catNav}</div>` : ''}
         </div>
@@ -173,8 +172,7 @@ const InventoryView = (() => {
         const bs = getBottleSize(item);
         const pct = getFillPercent(item.amount, bs);
         if (stockFilter === 'low' && pct > 25) return;
-        if (stockFilter === 'empty' && pct > 0) return;
-        if (stockFilter === 'full' && pct < 100) return;
+        if (stockFilter === 'almost' && pct > 45) return;
       }
       const cat = ingredient.category;
       if (!grouped[cat]) grouped[cat] = [];
@@ -216,25 +214,22 @@ const InventoryView = (() => {
     return `
       <div class="inv-item" data-uid="${uid}">
         <div class="inv-item-compact">
-          <div class="inv-item-name">${item.ingredient.name}</div>
-          ${sub ? `<div class="inv-item-sub">${sub}</div>` : ''}
-          <div class="inv-item-pct" style="color:${fillColor}">${percent}%</div>
+          <div class="inv-item-info">
+            <div class="inv-item-name">${item.ingredient.name}</div>
+            ${sub ? `<div class="inv-item-sub">${sub}</div>` : ''}
+          </div>
+          <div class="inv-item-controls">
+            <button class="inv-pct-btn" data-action="decrease" data-uid="${uid}">\u2212</button>
+            <span class="inv-item-pct" style="color:${fillColor}" data-uid="${uid}">${percent}%</span>
+            <button class="inv-pct-btn" data-action="increase" data-uid="${uid}">+</button>
+          </div>
           <div class="inv-mini-bar"><div class="inv-mini-fill" style="width:${percent}%;background:${fillColor}"></div></div>
         </div>
         <div class="inv-item-expand" data-uid="${uid}">
-          <div class="inv-fill-slider-wrap" data-uid="${uid}" data-bottle="${bottleSize}">
-            <input type="range" class="inv-range-slider inv-fill-range" min="0" max="100" step="5" value="${percent}" data-uid="${uid}">
-          </div>
-          <div class="inv-amount-controls">
-            <button class="inv-amount-btn" data-action="decrease" data-uid="${uid}" data-step="5">\u2212</button>
-            <input class="inv-amount-input" type="number" min="0" max="100" step="5" value="${percent}" data-uid="${uid}" data-bottle="${bottleSize}">
-            <span class="inv-amount-unit">%</span>
-            <button class="inv-amount-btn" data-action="increase" data-uid="${uid}" data-step="5">+</button>
-          </div>
           <div class="inv-bottle-detail">${item.amount} / ${bottleSize} ${item.unit}</div>
           <div class="inv-expand-actions">
             <button class="inv-edit-btn" data-uid="${uid}" title="Edit">\u270e Edit</button>
-            <button class="inv-delete-btn" data-uid="${uid}" title="Remove">\u2715 Delete</button>
+            <button class="inv-delete-btn" data-uid="${uid}" title="Remove">\u2715 Verwijderen</button>
           </div>
         </div>
       </div>`;
@@ -335,57 +330,29 @@ const InventoryView = (() => {
       header.addEventListener('click', () => header.parentElement.classList.toggle('collapsed'));
     });
 
-    // Tap to expand/collapse item
-    document.querySelectorAll('.inv-item-compact').forEach(compact => {
-      compact.addEventListener('click', () => {
-        const item = compact.closest('.inv-item');
+    // Tap item name area to expand/collapse
+    document.querySelectorAll('.inv-item-info').forEach(info => {
+      info.addEventListener('click', () => {
+        const item = info.closest('.inv-item');
         const wasOpen = item.classList.contains('expanded');
-        // Close all others
         document.querySelectorAll('.inv-item.expanded').forEach(el => el.classList.remove('expanded'));
         if (!wasOpen) item.classList.add('expanded');
       });
     });
 
-    // Fill range sliders
-    document.querySelectorAll('.inv-fill-range').forEach(slider => {
-      slider.addEventListener('input', () => {
-        const uid = slider.dataset.uid;
-        const wrap = slider.closest('.inv-fill-slider-wrap');
-        const bottleSize = parseInt(wrap.dataset.bottle);
-        const fillPct = parseInt(slider.value);
-        const newAmount = Math.round(bottleSize * fillPct / 100);
-        Storage.updateInventoryItem(uid, newAmount);
-        updateItemRow(uid, newAmount, bottleSize);
-        if (newAmount <= 0) render();
-      });
-    });
-
-    // Amount buttons (+/- in percentage steps)
-    document.querySelectorAll('.inv-amount-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
+    // Inline +/- percentage buttons (always visible)
+    document.querySelectorAll('.inv-pct-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
         const uid = btn.dataset.uid;
         const action = btn.dataset.action;
-        const step = parseInt(btn.dataset.step) || 5;
         const inventory = Storage.getInventory();
         const item = inventory.find(i => i.uid === uid);
         if (!item) return;
         const bottleSize = getBottleSize(item);
         const currentPct = getFillPercent(item.amount, bottleSize);
-        const newPct = action === 'increase' ? Math.min(100, currentPct + step) : Math.max(0, currentPct - step);
+        const newPct = action === 'increase' ? Math.min(100, currentPct + 5) : Math.max(0, currentPct - 5);
         const newAmount = Math.round(bottleSize * newPct / 100);
-        Storage.updateInventoryItem(uid, newAmount);
-        updateItemRow(uid, newAmount, bottleSize);
-        if (newAmount <= 0) render();
-      });
-    });
-
-    // Direct input change (percentage-based)
-    document.querySelectorAll('.inv-amount-input').forEach(input => {
-      input.addEventListener('change', () => {
-        const uid = input.dataset.uid;
-        const pct = Math.min(100, Math.max(0, Math.round((parseFloat(input.value) || 0) / 5) * 5));
-        const bottleSize = parseInt(input.dataset.bottle) || 700;
-        const newAmount = Math.round(bottleSize * pct / 100);
         Storage.updateInventoryItem(uid, newAmount);
         updateItemRow(uid, newAmount, bottleSize);
         if (newAmount <= 0) render();
@@ -401,7 +368,7 @@ const InventoryView = (() => {
         if (!item) return;
         const row = document.querySelector(`.inv-item[data-uid="${uid}"]`);
         if (!row || row.querySelector('.inv-edit-form')) return;
-        const left = row.querySelector('.inv-item-left');
+        const expandArea = row.querySelector('.inv-item-expand');
         const form = document.createElement('div');
         form.className = 'inv-edit-form';
         form.innerHTML = `
@@ -411,7 +378,7 @@ const InventoryView = (() => {
             <button class="inv-edit-save inventory-btn">Save</button>
             <button class="inv-edit-cancel inv-amount-btn">&#10005;</button>
           </div>`;
-        left.appendChild(form);
+        expandArea.appendChild(form);
         form.querySelector('.inv-edit-save').addEventListener('click', () => {
           const brand = form.querySelector('[data-field="brand"]').value.trim();
           const variant = form.querySelector('[data-field="variant"]').value.trim();
@@ -442,13 +409,9 @@ const InventoryView = (() => {
     const pctEl = row.querySelector('.inv-item-pct');
     const miniFill = row.querySelector('.inv-mini-fill');
     const detail = row.querySelector('.inv-bottle-detail');
-    const input = row.querySelector('.inv-amount-input');
-    const slider = row.querySelector('.inv-fill-range');
     if (pctEl) { pctEl.textContent = percent + '%'; pctEl.style.color = fillColor; }
     if (miniFill) { miniFill.style.width = percent + '%'; miniFill.style.background = fillColor; }
     if (detail) detail.textContent = amount + ' / ' + bottleSize + ' ' + unit;
-    if (input) input.value = percent;
-    if (slider) slider.value = percent;
   }
 
   return { render };
