@@ -39,19 +39,19 @@ const BottleScanner = (() => {
         </div>
       </div>
     `;
-    overlay.classList.remove('hidden');
+    openModal();
 
     document.getElementById('scanner-close-key').onclick =
     document.getElementById('scanner-cancel-key').onclick = () => {
-      overlay.classList.add('hidden');
+      closeModal();
     };
 
     document.getElementById('scanner-save-key').onclick = () => {
       const val = document.getElementById('scanner-key-input').value.trim();
       if (!val) return;
       setApiKey(val);
-      overlay.classList.add('hidden');
-      if (onSuccess) onSuccess();
+      closeModal();
+      if (onSuccess) setTimeout(onSuccess, 350);
     };
   }
 
@@ -82,7 +82,7 @@ const BottleScanner = (() => {
         </label>
       </div>
     `;
-    overlay.classList.remove('hidden');
+    openModal();
 
     // Start camera
     startCamera();
@@ -90,7 +90,7 @@ const BottleScanner = (() => {
     document.getElementById('scanner-close-cam').onclick =
     document.getElementById('scanner-cancel-cam').onclick = () => {
       stopCamera();
-      overlay.classList.add('hidden');
+      closeModal();
     };
 
     document.getElementById('scanner-capture').onclick = capturePhoto;
@@ -177,7 +177,7 @@ const BottleScanner = (() => {
         </div>
       `;
       document.getElementById('scanner-close-err').onclick =
-      document.getElementById('scanner-close-err2').onclick = () => overlay.classList.add('hidden');
+      document.getElementById('scanner-close-err2').onclick = () => closeModal();
       document.getElementById('scanner-retry').onclick = () => showCamera();
     }
   }
@@ -314,7 +314,7 @@ IMPORTANT: Only return valid JSON, no markdown, no explanation.`;
 
     document.getElementById('scanner-close-review').onclick =
     document.getElementById('sr-cancel').onclick = () => {
-      overlay.classList.add('hidden');
+      closeModal();
     };
 
     document.getElementById('sr-rescan').onclick = () => showCamera();
@@ -331,7 +331,7 @@ IMPORTANT: Only return valid JSON, no markdown, no explanation.`;
 
       Storage.addInventoryItem(ingredientId, amount, unit, brand, bottleSizeVal, variant);
 
-      overlay.classList.add('hidden');
+      closeModal();
 
       // Refresh inventory if we're on that view
       if (typeof InventoryView !== 'undefined') {
@@ -341,6 +341,20 @@ IMPORTANT: Only return valid JSON, no markdown, no explanation.`;
   }
 
   /* ---------- Helpers ---------- */
+
+  function openModal() {
+    const overlay = document.getElementById('modal-overlay');
+    overlay.classList.remove('hidden');
+    requestAnimationFrame(() => overlay.classList.add('active'));
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeModal() {
+    const overlay = document.getElementById('modal-overlay');
+    overlay.classList.remove('active');
+    document.body.style.overflow = '';
+    setTimeout(() => overlay.classList.add('hidden'), 300);
+  }
 
   function escapeHtml(str) {
     const d = document.createElement('div');
