@@ -184,7 +184,7 @@ const BottleScanner = (() => {
 
     // Build the ingredient list for context
     const ingredientList = INGREDIENTS
-      .filter(i => i.category === 'spirit' || i.category === 'liqueur' || i.category === 'syrup')
+      .filter(i => i.category === 'spirit' || i.category === 'liqueur' || i.category === 'syrup' || i.category === 'bitters')
       .map(i => `${i.id}: ${i.name} (${i.category})`)
       .join('\n');
 
@@ -192,7 +192,7 @@ const BottleScanner = (() => {
 
 - "ingredientId": The best matching ID from the ingredient list below. If no exact match, pick the closest category or return null.
 - "name": The display name (e.g. "Melon Liqueur", "Bourbon", "Gin", "Simple Syrup", "Vanilla Syrup")
-- "category": Either "spirit", "liqueur", or "syrup"
+- "category": Either "spirit", "liqueur", "syrup", or "bitters"
 - "brand": The brand name visible on the bottle (e.g. "Midori", "Hendrick's", "Monin", "Teisseire")
 - "variant": The specific variant/edition/flavor (e.g. "Honey", "Apple", "Vanilla", "Peach"). For syrups the flavor IS the variant — always fill this in. Use "Origineel" only if it's a plain/unflavored standard version.
 - "fillPercent": Estimated fill level of the bottle as a number 0-100, rounded to nearest 5. Estimate based on liquid visible in the bottle.
@@ -252,7 +252,7 @@ IMPORTANT: Only return valid JSON, no markdown, no explanation.`;
     const content = document.getElementById('modal-content');
 
     // Build ingredient options
-    const scannable = INGREDIENTS.filter(i => i.category === 'spirit' || i.category === 'liqueur' || i.category === 'syrup');
+    const scannable = INGREDIENTS.filter(i => i.category === 'spirit' || i.category === 'liqueur' || i.category === 'syrup' || i.category === 'bitters');
     const optionsHtml = scannable.map(i => {
       const sel = i.id === result.ingredientId ? 'selected' : '';
       return `<option value="${i.id}" ${sel}>${i.name} (${i.category})</option>`;

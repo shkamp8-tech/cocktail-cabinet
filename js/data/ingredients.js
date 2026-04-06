@@ -50,7 +50,10 @@ const INGREDIENTS = [
 
   // === SYRUPS ===
   { id: 'agave', name: 'Agave', category: 'syrup', defaultUnit: 'ml' },
+  { id: 'grapefruit-syrup', name: 'Grapefruit Syrup', category: 'syrup', defaultUnit: 'ml' },
   { id: 'grenadine', name: 'Grenadine', category: 'syrup', defaultUnit: 'ml' },
+  { id: 'lychee-syrup', name: 'Lychee Syrup', category: 'syrup', defaultUnit: 'ml' },
+  { id: 'mandarin-syrup', name: 'Mandarin Syrup', category: 'syrup', defaultUnit: 'ml' },
   { id: 'maple-syrup', name: 'Maple Syrup', category: 'syrup', defaultUnit: 'ml' },
   { id: 'passion-fruit-syrup', name: 'Passion Fruit Syrup', category: 'syrup', defaultUnit: 'ml' },
   { id: 'simple-syrup', name: 'Simple Syrup', category: 'syrup', defaultUnit: 'ml' },
