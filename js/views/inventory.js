@@ -187,13 +187,7 @@ const InventoryView = (() => {
         const items = grouped[cat];
         return `
           <div class="inv-category" id="inv-cat-${cat}" data-category="${cat}">
-            <div class="inv-category-header">
-              <span class="inv-category-title">
-                ${INGREDIENT_CATEGORIES[cat]}
-                <span class="inv-category-count">${items.length}</span>
-              </span>
-              <span class="inv-category-toggle">&#9660;</span>
-            </div>
+            <div class="inv-category-label">${INGREDIENT_CATEGORIES[cat]} <span class="inv-category-count">${items.length}</span></div>
             <div class="inv-category-body inv-grid">
               ${items.map(renderItem).join('')}
             </div>
@@ -218,14 +212,15 @@ const InventoryView = (() => {
             <div class="inv-item-name">${item.ingredient.name}</div>
             ${sub ? `<div class="inv-item-sub">${sub}</div>` : ''}
           </div>
-          <div class="inv-item-controls">
-            <button class="inv-pct-btn" data-action="decrease" data-uid="${uid}">\u2212</button>
-            <span class="inv-item-pct" style="color:${fillColor}" data-uid="${uid}">${percent}%</span>
-            <button class="inv-pct-btn" data-action="increase" data-uid="${uid}">+</button>
-          </div>
+          <span class="inv-item-pct" style="color:${fillColor}" data-uid="${uid}">${percent}%</span>
           <div class="inv-mini-bar"><div class="inv-mini-fill" style="width:${percent}%;background:${fillColor}"></div></div>
         </div>
         <div class="inv-item-expand" data-uid="${uid}">
+          <div class="inv-expand-controls">
+            <button class="inv-pct-btn" data-action="decrease" data-uid="${uid}">\u2212</button>
+            <span class="inv-expand-pct" data-uid="${uid}">${percent}%</span>
+            <button class="inv-pct-btn" data-action="increase" data-uid="${uid}">+</button>
+          </div>
           <div class="inv-bottle-detail">${item.amount} / ${bottleSize} ${item.unit}</div>
           <div class="inv-expand-actions">
             <button class="inv-edit-btn" data-uid="${uid}" title="Edit">\u270e Edit</button>
@@ -325,22 +320,17 @@ const InventoryView = (() => {
   }
 
   function rebindItemEvents() {
-    // Category collapse toggle
-    document.querySelectorAll('.inv-category-header').forEach(header => {
-      header.addEventListener('click', () => header.parentElement.classList.toggle('collapsed'));
-    });
-
-    // Tap item name area to expand/collapse
-    document.querySelectorAll('.inv-item-info').forEach(info => {
-      info.addEventListener('click', () => {
-        const item = info.closest('.inv-item');
+    // Tap item to expand/collapse
+    document.querySelectorAll('.inv-item-compact').forEach(compact => {
+      compact.addEventListener('click', () => {
+        const item = compact.closest('.inv-item');
         const wasOpen = item.classList.contains('expanded');
         document.querySelectorAll('.inv-item.expanded').forEach(el => el.classList.remove('expanded'));
         if (!wasOpen) item.classList.add('expanded');
       });
     });
 
-    // Inline +/- percentage buttons (always visible)
+    // Inline +/- percentage buttons (in expanded view)
     document.querySelectorAll('.inv-pct-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -407,9 +397,11 @@ const InventoryView = (() => {
     const percent = getFillPercent(amount, bottleSize);
     const fillColor = getFillColor(percent);
     const pctEl = row.querySelector('.inv-item-pct');
+    const expandPct = row.querySelector('.inv-expand-pct');
     const miniFill = row.querySelector('.inv-mini-fill');
     const detail = row.querySelector('.inv-bottle-detail');
     if (pctEl) { pctEl.textContent = percent + '%'; pctEl.style.color = fillColor; }
+    if (expandPct) { expandPct.textContent = percent + '%'; }
     if (miniFill) { miniFill.style.width = percent + '%'; miniFill.style.background = fillColor; }
     if (detail) detail.textContent = amount + ' / ' + bottleSize + ' ' + unit;
   }

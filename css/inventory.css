@@ -124,33 +124,18 @@
   color: var(--gold);
 }
 
-/* Category group */
+/* Category group — flat label, no box */
 .inv-category {
-  background: var(--bg-secondary);
-  border: 1px solid var(--gold-dim);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-}
-
-.inv-category-header {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: var(--space-md) var(--space-lg);
-  background: rgba(232, 197, 71, 0.04);
-  border-bottom: 1px solid rgba(232, 197, 71, 0.06);
-  cursor: pointer;
-  transition: background var(--transition-fast);
+  flex-direction: column;
+  gap: 6px;
 }
 
-.inv-category-header:hover {
-  background: rgba(232, 197, 71, 0.08);
-}
-
-.inv-category-title {
+.inv-category-label {
   font-family: var(--font-heading);
-  font-size: 1rem;
+  font-size: 0.85rem;
   color: var(--gold);
+  padding: 0 2px;
   display: flex;
   align-items: center;
   gap: var(--space-sm);
@@ -158,25 +143,8 @@
 
 .inv-category-count {
   font-family: var(--font-body);
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   color: var(--text-muted);
-  background: var(--bg-tertiary);
-  padding: 2px 8px;
-  border-radius: var(--radius-pill);
-}
-
-.inv-category-toggle {
-  color: var(--text-muted);
-  font-size: 0.8rem;
-  transition: transform var(--transition-fast);
-}
-
-.inv-category.collapsed .inv-category-toggle {
-  transform: rotate(-90deg);
-}
-
-.inv-category.collapsed .inv-category-body {
-  display: none;
 }
 
 /* Item rows — compact 2-column grid */
@@ -205,17 +173,17 @@
   cursor: default;
 }
 
-/* Compact view: name + sub + inline +/- percentage + mini bar */
+/* Compact view: name + percentage + mini bar */
 .inv-item-compact {
   display: grid;
   grid-template-columns: 1fr auto;
   gap: 2px 8px;
   align-items: center;
+  cursor: pointer;
 }
 
 .inv-item-info {
   min-width: 0;
-  cursor: pointer;
 }
 
 .inv-item-name {
@@ -235,10 +203,10 @@
   text-overflow: ellipsis;
 }
 
-.inv-item-controls {
+.inv-expand-controls {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 8px;
 }
 
 .inv-pct-btn {
