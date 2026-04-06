@@ -27,6 +27,7 @@ const INGREDIENTS = [
   { id: 'melon-liqueur', name: 'Melon Liqueur', category: 'liqueur', defaultUnit: 'ml' },
   { id: 'orange-liqueur', name: 'Orange Liqueur', category: 'liqueur', defaultUnit: 'ml' },
   { id: 'passion-fruit-liqueur', name: 'Passion Fruit Liqueur', category: 'liqueur', defaultUnit: 'ml' },
+  { id: 'peach-liqueur', name: 'Peach Liqueur', category: 'liqueur', defaultUnit: 'ml' },
   { id: 'vanilla-liqueur', name: 'Vanilla Liqueur', category: 'liqueur', defaultUnit: 'ml' },
 
   // === MIXERS ===
