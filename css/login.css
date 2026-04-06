@@ -1,0 +1,101 @@
+/* ===== Login / PIN Screen ===== */
+.login-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-primary);
+}
+
+.login-card {
+  text-align: center;
+  padding: var(--space-2xl) var(--space-xl);
+  background: var(--bg-secondary);
+  border: 1px solid var(--gold-dim);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-modal);
+  max-width: 340px;
+  width: 90%;
+}
+
+.login-card .logo-diamond {
+  color: var(--gold);
+  font-size: 1.6rem;
+}
+
+.login-card h1 {
+  font-family: var(--font-heading);
+  color: var(--gold);
+  font-size: 1.5rem;
+  margin: var(--space-md) 0 var(--space-xs);
+}
+
+.login-card p {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  margin-bottom: var(--space-lg);
+}
+
+.pin-inputs {
+  display: flex;
+  gap: var(--space-sm);
+  justify-content: center;
+  margin-bottom: var(--space-lg);
+}
+
+.pin-inputs input {
+  width: 52px;
+  height: 60px;
+  text-align: center;
+  font-size: 1.6rem;
+  font-family: var(--font-heading);
+  color: var(--gold);
+  background: var(--bg-primary);
+  border: 2px solid var(--bg-tertiary);
+  border-radius: var(--radius-md);
+  outline: none;
+  transition: border-color var(--transition-fast);
+  -webkit-appearance: none;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.pin-inputs input:focus {
+  border-color: var(--gold);
+  box-shadow: var(--shadow-glow-gold);
+}
+
+.pin-inputs input::-webkit-outer-spin-button,
+.pin-inputs input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.login-error {
+  color: var(--coral);
+  font-size: 0.8rem;
+  min-height: 1.2em;
+  margin-top: calc(-1 * var(--space-md));
+  margin-bottom: var(--space-md);
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.login-error.visible {
+  opacity: 1;
+}
+
+.login-card .pin-inputs input.shake {
+  animation: pinShake 0.4s ease;
+  border-color: var(--coral);
+}
+
+@keyframes pinShake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}

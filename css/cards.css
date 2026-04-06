@@ -1,0 +1,219 @@
+/* ===== Card Grid & Card Styling ===== */
+
+/* Grid layout */
+.cocktail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--card-min-width), 1fr));
+  gap: var(--card-gap);
+}
+
+/* === Card === */
+.cocktail-card {
+  position: relative;
+  background: var(--bg-secondary);
+  border: 1px solid var(--gold-dim);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  cursor: pointer;
+  transition: transform var(--transition-normal), box-shadow var(--transition-normal), border-color var(--transition-normal);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-sm);
+  overflow: hidden;
+  /* Animation: start hidden for stagger */
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.cocktail-card.visible {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.5s ease, transform 0.5s ease, box-shadow var(--transition-normal), border-color var(--transition-normal);
+}
+
+/* Art Deco corner accents */
+.cocktail-card::before,
+.cocktail-card::after {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border-color: var(--gold);
+  opacity: 0.2;
+  transition: opacity var(--transition-fast);
+}
+
+.cocktail-card::before {
+  top: 6px;
+  left: 6px;
+  border-top: 1.5px solid;
+  border-left: 1.5px solid;
+}
+
+.cocktail-card::after {
+  bottom: 6px;
+  right: 6px;
+  border-bottom: 1.5px solid;
+  border-right: 1.5px solid;
+}
+
+/* Hover */
+.cocktail-card:hover {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: var(--shadow-card-hover);
+  border-color: rgba(232, 197, 71, 0.3);
+}
+
+.cocktail-card:hover::before,
+.cocktail-card:hover::after {
+  opacity: 0.5;
+}
+
+/* Made badge */
+.card-made-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--purple);
+  background: var(--purple-dim);
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+}
+
+/* Glass icon area */
+.card-icon {
+  margin-bottom: var(--space-xs);
+}
+
+/* Cocktail name */
+.card-name {
+  font-family: var(--font-heading);
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: 0.3px;
+  line-height: 1.3;
+}
+
+/* Star rating on card */
+.card-rating {
+  display: flex;
+  gap: 2px;
+  justify-content: center;
+  min-height: 20px;
+}
+
+.card-rating .star {
+  font-size: 14px;
+  color: var(--text-muted);
+  transition: color var(--transition-fast), transform var(--transition-fast);
+  line-height: 1;
+}
+
+.card-rating .star.filled {
+  color: var(--gold);
+}
+
+.card-rating .star.no-rating {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: var(--font-body);
+  align-self: center;
+}
+
+/* Flavor badges */
+.card-flavors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  justify-content: center;
+}
+
+.flavor-badge {
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  background: var(--badge-bg);
+  color: var(--badge-color);
+}
+
+/* Strength dots */
+.card-strength {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.strength-dots {
+  display: flex;
+  gap: 3px;
+}
+
+.strength-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--bg-tertiary);
+  transition: background var(--transition-fast);
+}
+
+.strength-dot.filled { background: var(--strength-medium); }
+.strength-1 .strength-dot.filled { background: var(--strength-light); }
+.strength-2 .strength-dot.filled { background: var(--strength-medium); }
+.strength-3 .strength-dot.filled { background: var(--strength-strong); }
+.strength-4 .strength-dot.filled { background: var(--strength-very-strong); }
+
+/* Availability badge */
+.card-availability {
+  font-size: 0.7rem;
+  font-weight: 500;
+  padding: 2px 10px;
+  border-radius: var(--radius-pill);
+  margin-top: var(--space-xs);
+}
+
+.availability-available {
+  color: var(--available);
+  background: var(--turquoise-dim);
+}
+
+.availability-partial {
+  color: var(--partial);
+  background: var(--yellow-dim);
+}
+
+.availability-unavailable {
+  color: var(--text-muted);
+  background: rgba(122, 117, 106, 0.1);
+}
+
+/* === Responsive === */
+@media (max-width: 768px) {
+  .cocktail-grid {
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: var(--space-md);
+  }
+
+  .cocktail-card {
+    padding: var(--space-md);
+  }
+}
+
+@media (max-width: 480px) {
+  .cocktail-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,342 @@
+/* ===== Bottle Scanner Styles ===== */
+
+/* --- API Key Prompt --- */
+.scanner-apikey-prompt {
+  padding: var(--space-lg);
+  position: relative;
+}
+
+.scanner-apikey-prompt h3 {
+  font-family: var(--font-heading);
+  color: var(--gold);
+  margin-bottom: var(--space-sm);
+}
+
+.scanner-apikey-prompt p {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  margin-bottom: var(--space-md);
+  line-height: 1.5;
+}
+
+/* --- Shared --- */
+.scanner-input {
+  width: 100%;
+  padding: 10px 12px;
+  background: var(--bg-primary);
+  border: 1px solid var(--bg-tertiary);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color var(--transition-fast);
+  box-sizing: border-box;
+}
+
+.scanner-input:focus {
+  border-color: var(--gold);
+}
+
+select.scanner-input {
+  cursor: pointer;
+}
+
+.scanner-range {
+  width: 100%;
+  accent-color: var(--gold);
+  cursor: pointer;
+}
+
+.scanner-actions {
+  display: flex;
+  gap: var(--space-sm);
+  margin-top: var(--space-lg);
+  justify-content: flex-end;
+}
+
+.scanner-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.scanner-btn.primary {
+  background: var(--gold);
+  color: var(--text-dark);
+}
+
+.scanner-btn.primary:hover {
+  background: #d4b13e;
+}
+
+.scanner-btn.secondary {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.scanner-btn.secondary:hover {
+  background: var(--bg-hover);
+}
+
+.scanner-btn.danger {
+  background: transparent;
+  color: var(--coral);
+  border: 1px solid var(--coral-dim);
+}
+
+.scanner-btn.danger:hover {
+  background: var(--coral-dim);
+}
+
+/* --- Camera --- */
+.scanner-camera {
+  padding: var(--space-lg);
+  position: relative;
+}
+
+.scanner-camera h3 {
+  font-family: var(--font-heading);
+  color: var(--gold);
+  margin-bottom: var(--space-xs);
+}
+
+.scanner-hint {
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  margin-bottom: var(--space-md);
+}
+
+.scanner-viewfinder {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto var(--space-md);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: #000;
+  aspect-ratio: 4/3;
+}
+
+.scanner-viewfinder video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.scanner-frame {
+  position: absolute;
+  inset: 15%;
+  border: 2px solid var(--gold);
+  border-radius: var(--radius-md);
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.scanner-frame::before,
+.scanner-frame::after {
+  content: '';
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  border: 3px solid var(--gold);
+  opacity: 1;
+}
+
+.scanner-frame::before {
+  top: -2px;
+  left: -2px;
+  border-right: none;
+  border-bottom: none;
+  border-radius: 4px 0 0 0;
+}
+
+.scanner-frame::after {
+  bottom: -2px;
+  right: -2px;
+  border-left: none;
+  border-top: none;
+  border-radius: 0 0 4px 0;
+}
+
+.capture-circle {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--coral);
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+.scanner-upload-label {
+  display: block;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  margin-top: var(--space-md);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.scanner-upload-label:hover {
+  color: var(--text-secondary);
+}
+
+.scanner-error {
+  color: var(--text-secondary);
+  text-align: center;
+  padding: var(--space-2xl) var(--space-lg);
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+/* --- Loading --- */
+.scanner-loading {
+  text-align: center;
+  padding: var(--space-2xl) var(--space-lg);
+}
+
+.scanner-loading h3 {
+  font-family: var(--font-heading);
+  color: var(--gold);
+  margin-bottom: var(--space-sm);
+}
+
+.scanner-loading p {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+}
+
+.scanner-spinner {
+  width: 48px;
+  height: 48px;
+  border: 3px solid var(--bg-tertiary);
+  border-top-color: var(--gold);
+  border-radius: 50%;
+  margin: 0 auto var(--space-lg);
+  animation: scannerSpin 0.8s linear infinite;
+}
+
+@keyframes scannerSpin {
+  to { transform: rotate(360deg); }
+}
+
+/* --- Error Screen --- */
+.scanner-error-screen {
+  padding: var(--space-lg);
+  position: relative;
+}
+
+.scanner-error-screen h3 {
+  font-family: var(--font-heading);
+  color: var(--coral);
+  margin-bottom: var(--space-sm);
+}
+
+.scanner-error-screen p {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+/* --- Review Screen --- */
+.scanner-review {
+  padding: var(--space-lg);
+  position: relative;
+}
+
+.scanner-review h3 {
+  font-family: var(--font-heading);
+  color: var(--gold);
+  margin-bottom: var(--space-md);
+}
+
+.scanner-warning {
+  color: var(--coral);
+  font-size: 0.8rem;
+  margin-bottom: var(--space-md);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--coral-dim);
+  border-radius: var(--radius-sm);
+}
+
+.scanner-review-split {
+  display: flex;
+  gap: var(--space-lg);
+  align-items: flex-start;
+}
+
+.scanner-preview {
+  flex: 0 0 140px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--bg-tertiary);
+}
+
+.scanner-preview img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.scanner-review-fields {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.scanner-review-fields label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.scanner-review-fields label strong {
+  color: var(--gold);
+  font-size: 0.95rem;
+}
+
+/* --- Mobile --- */
+@media (max-width: 600px) {
+  .scanner-review-split {
+    flex-direction: column;
+  }
+
+  .scanner-preview {
+    flex: none;
+    width: 100%;
+    max-height: 200px;
+  }
+
+  .scanner-preview img {
+    max-height: 200px;
+    object-fit: cover;
+  }
+
+  .scanner-actions {
+    flex-wrap: wrap;
+  }
+
+  .scanner-btn {
+    flex: 1;
+    min-width: 80px;
+    text-align: center;
+  }
+
+  .scanner-viewfinder {
+    max-width: 100%;
+  }
+}

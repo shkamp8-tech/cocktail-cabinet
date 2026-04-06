@@ -1,0 +1,319 @@
+/* ===== Modal Overlay ===== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  padding: var(--space-md);
+}
+
+.modal-overlay.active {
+  opacity: 1;
+}
+
+.modal-overlay.hidden {
+  display: none;
+  opacity: 0;
+}
+
+/* Modal Content */
+.modal-content {
+  background: var(--bg-secondary);
+  border: 1px solid var(--gold-dim);
+  border-radius: var(--radius-xl);
+  width: 100%;
+  max-width: 600px;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-modal);
+  transform: scale(0.92);
+  transition: transform 0.3s var(--ease-smooth);
+  position: relative;
+}
+
+.modal-overlay.active .modal-content {
+  transform: scale(1);
+}
+
+/* Scrollbar styling */
+.modal-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modal-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.modal-content::-webkit-scrollbar-thumb {
+  background: var(--gold-dim);
+  border-radius: 3px;
+}
+
+/* Close button */
+.modal-close {
+  position: absolute;
+  top: var(--space-md);
+  right: var(--space-md);
+  width: 32px;
+  height: 32px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--gold-dim);
+  border-radius: 50%;
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+  z-index: 2;
+}
+
+.modal-close:hover {
+  color: var(--gold);
+  border-color: var(--gold);
+  background: var(--gold-dim);
+}
+
+/* === Modal Inner Layout === */
+.modal-header {
+  text-align: center;
+  padding: var(--space-xl) var(--space-xl) var(--space-md);
+}
+
+.modal-header .glass-icon {
+  margin-bottom: var(--space-md);
+}
+
+.modal-title {
+  font-family: var(--font-heading);
+  font-size: 1.75rem;
+  color: var(--gold);
+  margin-bottom: var(--space-xs);
+}
+
+.modal-glass-info {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Section dividers */
+.modal-section {
+  padding: var(--space-md) var(--space-xl);
+}
+
+.modal-section + .modal-section {
+  border-top: 1px solid rgba(232, 197, 71, 0.06);
+}
+
+.modal-section-title {
+  font-family: var(--font-heading);
+  font-size: 0.85rem;
+  color: var(--gold);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: var(--space-sm);
+}
+
+/* Ingredients list */
+.ingredient-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ingredient-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  transition: background var(--transition-fast);
+}
+
+.ingredient-item:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.ingredient-name {
+  color: var(--text-primary);
+}
+
+.ingredient-amount {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+}
+
+.ingredient-available .ingredient-name::before {
+  content: '✓ ';
+  color: var(--available);
+  font-size: 0.8em;
+}
+
+.ingredient-missing .ingredient-name {
+  color: var(--unavailable);
+}
+
+.ingredient-missing .ingredient-name::before {
+  content: '✗ ';
+  color: var(--unavailable);
+  font-size: 0.8em;
+}
+
+/* Instructions */
+.modal-instructions {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+/* Flavor & strength row */
+.modal-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  align-items: center;
+}
+
+/* Interactive rating in modal */
+.modal-rating {
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+}
+
+.modal-rating .star-btn {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color var(--transition-fast), transform var(--transition-fast);
+  padding: 2px;
+  line-height: 1;
+}
+
+.modal-rating .star-btn.filled {
+  color: var(--gold);
+}
+
+.modal-rating .star-btn:hover {
+  transform: scale(1.2);
+  color: var(--gold);
+}
+
+/* Made toggle */
+.made-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) 0;
+}
+
+.made-toggle-btn {
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 500;
+  padding: var(--space-sm) var(--space-md);
+  background: transparent;
+  border: 1px solid var(--gold-dim);
+  border-radius: var(--radius-pill);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.made-toggle-btn.active {
+  background: var(--purple-dim);
+  color: var(--purple);
+  border-color: var(--purple);
+}
+
+.made-toggle-btn:hover {
+  border-color: var(--purple);
+}
+
+.made-date {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+/* Notes textarea */
+.modal-notes textarea {
+  width: 100%;
+  min-height: 80px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--gold-dim);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  padding: var(--space-sm) var(--space-md);
+  resize: vertical;
+  transition: border-color var(--transition-fast);
+}
+
+.modal-notes textarea:focus {
+  outline: none;
+  border-color: var(--gold);
+}
+
+.modal-notes textarea::placeholder {
+  color: var(--text-muted);
+}
+
+/* Delete button for custom recipes */
+.delete-recipe-btn {
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  padding: var(--space-sm) var(--space-md);
+  background: transparent;
+  border: 1px solid var(--unavailable);
+  border-radius: var(--radius-md);
+  color: var(--unavailable);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.delete-recipe-btn:hover {
+  background: rgba(255, 107, 107, 0.1);
+}
+
+/* Footer in modal */
+.modal-footer {
+  padding: var(--space-md) var(--space-xl) var(--space-xl);
+  display: flex;
+  justify-content: center;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .modal-content {
+    max-height: 95vh;
+    border-radius: var(--radius-lg);
+  }
+
+  .modal-header {
+    padding: var(--space-lg) var(--space-md) var(--space-sm);
+  }
+
+  .modal-section {
+    padding: var(--space-sm) var(--space-md);
+  }
+
+  .modal-title {
+    font-size: 1.4rem;
+  }
+}
