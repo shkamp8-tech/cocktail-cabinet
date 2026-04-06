@@ -60,7 +60,7 @@ const INGREDIENTS = [
   { id: 'vanilla-syrup', name: 'Vanilla Syrup', category: 'syrup', defaultUnit: 'ml' },
 
   // === BITTERS ===
-  { id: 'angostura-bitters', name: 'Angostura Bitters', category: 'bitters', defaultUnit: 'ml' },
+  { id: 'bitters', name: 'Bitters', category: 'bitters', defaultUnit: 'ml' },
 
   // === FRESH ===
   { id: 'jalapenos', name: 'Jalapenos', category: 'fresh', defaultUnit: 'pcs' },

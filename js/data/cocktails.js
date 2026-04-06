@@ -344,7 +344,7 @@ const COCKTAILS = [
       { ingredientId: 'tequila', amount: 60, unit: 'ml' },
       { ingredientId: 'lime-juice', amount: 20, unit: 'ml' },
       { ingredientId: 'agave', amount: 15, unit: 'ml' },
-      { ingredientId: 'angostura-bitters', amount: 2, unit: 'ml' }
+      { ingredientId: 'bitters', amount: 2, unit: 'ml' }
     ],
     garnish: 'Lime peel',
     instructions: 'Stir tequila, lime juice, agave, and bitters with ice. Strain into an old fashioned glass over a large ice sphere. Express a lime peel over the drink and drop it in.'
