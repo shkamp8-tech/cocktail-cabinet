@@ -26,6 +26,7 @@ const InventoryView = (() => {
   }
 
   let searchTerm = '';
+  let stockFilter = ''; // '' | 'low' | 'empty' | 'full'
 
   function render() {
     const container = document.getElementById('main-content');
@@ -35,6 +36,14 @@ const InventoryView = (() => {
     let canMake = 0;
     allCocktails.forEach(c => {
       if (Availability.check(c, inventory).status === 'available') canMake++;
+    });
+
+    // Low stock count
+    let lowCount = 0;
+    inventory.forEach(item => {
+      const bs = getBottleSize(item);
+      const pct = getFillPercent(item.amount, bs);
+      if (pct <= 25 && pct > 0) lowCount++;
     });
 
     // Category counts for nav
@@ -70,14 +79,20 @@ const InventoryView = (() => {
             <div class="stat-label">Can Make</div>
           </div>
           <div class="inv-summary-stat">
-            <div class="stat-number">${allCocktails.length}</div>
-            <div class="stat-label">Recipes</div>
+            <div class="stat-number" style="color:var(--coral)">${lowCount}</div>
+            <div class="stat-label">Low Stock</div>
           </div>
         </div>
 
         <div class="inv-toolbar">
           <div class="inv-search-wrap">
             <input type="text" id="inv-search" class="inv-search" placeholder="Search inventory..." value="${searchTerm}">
+          </div>
+          <div class="inv-stock-filters">
+            <button class="inv-stock-chip${stockFilter === '' ? ' active' : ''}" data-stock="">All</button>
+            <button class="inv-stock-chip${stockFilter === 'low' ? ' active' : ''}" data-stock="low">⚠ Bijhalen</button>
+            <button class="inv-stock-chip${stockFilter === 'empty' ? ' active' : ''}" data-stock="empty">Leeg</button>
+            <button class="inv-stock-chip${stockFilter === 'full' ? ' active' : ''}" data-stock="full">Vol</button>
           </div>
           ${catNav ? `<div class="inv-cat-nav">${catNav}</div>` : ''}
         </div>
@@ -153,6 +168,14 @@ const InventoryView = (() => {
         const haystack = (ingredient.name + ' ' + (item.brand || '') + ' ' + (item.variant || '')).toLowerCase();
         if (!haystack.includes(q)) return;
       }
+      // Stock filter
+      if (stockFilter) {
+        const bs = getBottleSize(item);
+        const pct = getFillPercent(item.amount, bs);
+        if (stockFilter === 'low' && pct > 25) return;
+        if (stockFilter === 'empty' && pct > 0) return;
+        if (stockFilter === 'full' && pct < 100) return;
+      }
       const cat = ingredient.category;
       if (!grouped[cat]) grouped[cat] = [];
       grouped[cat].push({ ...item, ingredient });
@@ -173,7 +196,7 @@ const InventoryView = (() => {
               </span>
               <span class="inv-category-toggle">&#9660;</span>
             </div>
-            <div class="inv-category-body">
+            <div class="inv-category-body inv-grid">
               ${items.map(renderItem).join('')}
             </div>
           </div>`;
@@ -184,30 +207,21 @@ const InventoryView = (() => {
     const bottleSize = getBottleSize(item);
     const percent = getFillPercent(item.amount, bottleSize);
     const fillColor = getFillColor(percent);
-    const fillLabel = getFillLabel(percent);
     const uid = item.uid;
 
-    const subtitleParts = [];
-    if (item.brand) subtitleParts.push(item.brand);
-    if (item.variant) subtitleParts.push(item.variant);
-    const subtitle = subtitleParts.join(' \u00b7 ');
+    const variantLabel = item.variant && item.variant !== 'Origineel' ? item.variant : '';
+    const brandLabel = item.brand || '';
+    const sub = [brandLabel, variantLabel].filter(Boolean).join(' · ');
 
     return `
       <div class="inv-item" data-uid="${uid}">
-        <div class="inv-item-left">
-          <div class="inv-item-name">
-            ${item.ingredient.name}
-            ${subtitle ? `<span class="inv-item-brand">${subtitle}</span>` : ''}
-          </div>
-          <div class="inv-bottle-bar">
-            <div class="inv-bottle-track">
-              <div class="inv-bottle-fill" style="width:${percent}%;background:${fillColor}"></div>
-            </div>
-            <span class="inv-bottle-label" style="color:${fillColor}">${fillLabel} \u00b7 ${percent}%</span>
-          </div>
-          <div class="inv-bottle-detail">${item.amount} / ${bottleSize} ${item.unit}</div>
+        <div class="inv-item-compact">
+          <div class="inv-item-name">${item.ingredient.name}</div>
+          ${sub ? `<div class="inv-item-sub">${sub}</div>` : ''}
+          <div class="inv-item-pct" style="color:${fillColor}">${percent}%</div>
+          <div class="inv-mini-bar"><div class="inv-mini-fill" style="width:${percent}%;background:${fillColor}"></div></div>
         </div>
-        <div class="inv-item-right">
+        <div class="inv-item-expand" data-uid="${uid}">
           <div class="inv-fill-slider-wrap" data-uid="${uid}" data-bottle="${bottleSize}">
             <input type="range" class="inv-range-slider inv-fill-range" min="0" max="100" step="5" value="${percent}" data-uid="${uid}">
           </div>
@@ -217,8 +231,11 @@ const InventoryView = (() => {
             <span class="inv-amount-unit">%</span>
             <button class="inv-amount-btn" data-action="increase" data-uid="${uid}" data-step="5">+</button>
           </div>
-          <button class="inv-edit-btn" data-uid="${uid}" title="Edit">\u270e</button>
-          <button class="inv-delete-btn" data-uid="${uid}" title="Remove">\u2715</button>
+          <div class="inv-bottle-detail">${item.amount} / ${bottleSize} ${item.unit}</div>
+          <div class="inv-expand-actions">
+            <button class="inv-edit-btn" data-uid="${uid}" title="Edit">\u270e Edit</button>
+            <button class="inv-delete-btn" data-uid="${uid}" title="Remove">\u2715 Delete</button>
+          </div>
         </div>
       </div>`;
   }
@@ -246,6 +263,17 @@ const InventoryView = (() => {
         const id = link.getAttribute('href').slice(1);
         const el = document.getElementById(id);
         if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    });
+
+    // Stock filter chips
+    document.querySelectorAll('.inv-stock-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        stockFilter = chip.dataset.stock;
+        const catContainer = document.getElementById('inv-categories');
+        if (catContainer) catContainer.innerHTML = renderCategories(Storage.getInventory());
+        document.querySelectorAll('.inv-stock-chip').forEach(c => c.classList.toggle('active', c.dataset.stock === stockFilter));
+        rebindItemEvents();
       });
     });
 
@@ -305,6 +333,17 @@ const InventoryView = (() => {
     // Category collapse toggle
     document.querySelectorAll('.inv-category-header').forEach(header => {
       header.addEventListener('click', () => header.parentElement.classList.toggle('collapsed'));
+    });
+
+    // Tap to expand/collapse item
+    document.querySelectorAll('.inv-item-compact').forEach(compact => {
+      compact.addEventListener('click', () => {
+        const item = compact.closest('.inv-item');
+        const wasOpen = item.classList.contains('expanded');
+        // Close all others
+        document.querySelectorAll('.inv-item.expanded').forEach(el => el.classList.remove('expanded'));
+        if (!wasOpen) item.classList.add('expanded');
+      });
     });
 
     // Fill range sliders
@@ -400,14 +439,13 @@ const InventoryView = (() => {
     const unit = item ? item.unit : 'ml';
     const percent = getFillPercent(amount, bottleSize);
     const fillColor = getFillColor(percent);
-    const fillLabel = getFillLabel(percent);
-    const fill = row.querySelector('.inv-bottle-fill');
-    const label = row.querySelector('.inv-bottle-label');
+    const pctEl = row.querySelector('.inv-item-pct');
+    const miniFill = row.querySelector('.inv-mini-fill');
     const detail = row.querySelector('.inv-bottle-detail');
     const input = row.querySelector('.inv-amount-input');
     const slider = row.querySelector('.inv-fill-range');
-    if (fill) { fill.style.width = percent + '%'; fill.style.background = fillColor; }
-    if (label) { label.textContent = fillLabel + ' \u00b7 ' + percent + '%'; label.style.color = fillColor; }
+    if (pctEl) { pctEl.textContent = percent + '%'; pctEl.style.color = fillColor; }
+    if (miniFill) { miniFill.style.width = percent + '%'; miniFill.style.background = fillColor; }
     if (detail) detail.textContent = amount + ' / ' + bottleSize + ' ' + unit;
     if (input) input.value = percent;
     if (slider) slider.value = percent;
