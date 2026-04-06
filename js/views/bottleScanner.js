@@ -204,6 +204,8 @@ ${ingredientList}
 
 If the bottle doesn't match any known ingredient, still fill in category, brand, variant, and estimate fill. Set ingredientId to the closest match or null.
 
+NOTE: Angostura Bitters and similar cocktail bitters are category "bitters", NOT "liqueur". Bitter liqueur (like Campari) is category "liqueur".
+
 IMPORTANT: Only return valid JSON, no markdown, no explanation.`;
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
