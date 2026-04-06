@@ -22,6 +22,7 @@ const INGREDIENTS = [
   { id: 'bitter-liqueur', name: 'Bitter Liqueur', category: 'liqueur', defaultUnit: 'ml' },
   { id: 'blackcurrant-liqueur', name: 'Blackcurrant Liqueur (Cassis)', category: 'liqueur', defaultUnit: 'ml' },
   { id: 'cherry-liqueur', name: 'Cherry Liqueur', category: 'liqueur', defaultUnit: 'ml' },
+  { id: 'chocolate-liqueur', name: 'Chocolate Liqueur', category: 'liqueur', defaultUnit: 'ml' },
   { id: 'coconut-liqueur', name: 'Coconut Liqueur', category: 'liqueur', defaultUnit: 'ml' },
   { id: 'elderflower-liqueur', name: 'Elderflower Liqueur', category: 'liqueur', defaultUnit: 'ml' },
   { id: 'herbal-liqueur', name: 'Herbal Liqueur', category: 'liqueur', defaultUnit: 'ml' },
