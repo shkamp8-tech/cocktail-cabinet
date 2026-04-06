@@ -2,10 +2,11 @@
 /* eslint-disable no-unused-vars */
 const INGREDIENTS = [
   // === SPIRITS ===
+  { id: 'absinthe', name: 'Absinthe', category: 'spirit', defaultUnit: 'ml' },
+  { id: 'apple-whiskey', name: 'Apple Whiskey', category: 'spirit', defaultUnit: 'ml' },
   { id: 'bourbon', name: 'Bourbon', category: 'spirit', defaultUnit: 'ml' },
   { id: 'dark-rum', name: 'Dark Rum', category: 'spirit', defaultUnit: 'ml' },
   { id: 'gin', name: 'Gin', category: 'spirit', defaultUnit: 'ml' },
-  { id: 'jack-daniels-apple', name: "Jack Daniel's Apple", category: 'spirit', defaultUnit: 'ml' },
   { id: 'mezcal', name: 'Mezcal', category: 'spirit', defaultUnit: 'ml' },
   { id: 'rye-whiskey', name: 'Rye Whiskey', category: 'spirit', defaultUnit: 'ml' },
   { id: 'tequila', name: 'Tequila', category: 'spirit', defaultUnit: 'ml' },
@@ -24,6 +25,7 @@ const INGREDIENTS = [
   { id: 'elderflower-liqueur', name: 'Elderflower Liqueur', category: 'liqueur', defaultUnit: 'ml' },
   { id: 'herbal-liqueur', name: 'Herbal Liqueur', category: 'liqueur', defaultUnit: 'ml' },
   { id: 'lemon-liqueur', name: 'Lemon Liqueur (Limoncello)', category: 'liqueur', defaultUnit: 'ml' },
+  { id: 'lychee-liqueur', name: 'Lychee Liqueur', category: 'liqueur', defaultUnit: 'ml' },
   { id: 'melon-liqueur', name: 'Melon Liqueur', category: 'liqueur', defaultUnit: 'ml' },
   { id: 'orange-liqueur', name: 'Orange Liqueur', category: 'liqueur', defaultUnit: 'ml' },
   { id: 'passion-fruit-liqueur', name: 'Passion Fruit Liqueur', category: 'liqueur', defaultUnit: 'ml' },

@@ -357,7 +357,7 @@ const COCKTAILS = [
     strength: 2,
     flavors: ['fruity', 'sweet', 'refreshing'],
     ingredients: [
-      { ingredientId: 'jack-daniels-apple', amount: 45, unit: 'ml' },
+      { ingredientId: 'apple-whiskey', amount: 45, unit: 'ml' },
       { ingredientId: 'apple-juice', amount: 60, unit: 'ml' },
       { ingredientId: 'lime-juice', amount: 10, unit: 'ml' },
       { ingredientId: 'sprite', amount: 60, unit: 'ml' }
