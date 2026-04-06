@@ -9,6 +9,7 @@ const INGREDIENTS = [
   { id: 'gin', name: 'Gin', category: 'spirit', defaultUnit: 'ml' },
   { id: 'mezcal', name: 'Mezcal', category: 'spirit', defaultUnit: 'ml' },
   { id: 'rye-whiskey', name: 'Rye Whiskey', category: 'spirit', defaultUnit: 'ml' },
+  { id: 'spiced-rum', name: 'Spiced Rum', category: 'spirit', defaultUnit: 'ml' },
   { id: 'tequila', name: 'Tequila', category: 'spirit', defaultUnit: 'ml' },
   { id: 'tequila-silver', name: 'Tequila Silver', category: 'spirit', defaultUnit: 'ml' },
   { id: 'vanilla-vodka', name: 'Vanilla Vodka', category: 'spirit', defaultUnit: 'ml' },
