@@ -3,7 +3,10 @@ const App = (() => {
 
   let displayMode = 'grid'; // 'grid' | 'canvas'
 
-  function init() {
+  async function init() {
+    // Pull remote data before rendering
+    await Storage.initSync();
+
     bindNav();
     bindFilters();
     bindExportImport();

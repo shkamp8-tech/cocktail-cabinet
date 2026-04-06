@@ -28,6 +28,8 @@ const Storage = (() => {
     } catch {
       console.error('Failed to save to localStorage');
     }
+    // Push to cloud
+    if (typeof Sync !== 'undefined') Sync.save(data);
   }
 
   // === Public API ===
@@ -216,6 +218,28 @@ const Storage = (() => {
     });
   }
 
+  // Pull remote data and merge into localStorage (remote wins)
+  async function initSync() {
+    if (typeof Sync === 'undefined') return;
+    try {
+      const remote = await Sync.load();
+      if (!remote) return; // no remote data yet, keep local
+      const local = load();
+      // Remote wins: use remote data, but merge any local-only fields
+      const merged = { ...defaultData, ...remote };
+      // Validate structure
+      if (!Array.isArray(merged.inventory)) merged.inventory = [];
+      if (typeof merged.ratings !== 'object') merged.ratings = {};
+      if (typeof merged.made !== 'object') merged.made = {};
+      if (typeof merged.notes !== 'object') merged.notes = {};
+      if (!Array.isArray(merged.customRecipes)) merged.customRecipes = [];
+      if (typeof merged.madeDate !== 'object') merged.madeDate = {};
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
+    } catch (e) {
+      console.warn('[Storage] initSync failed:', e);
+    }
+  }
+
   return {
     getUserData, saveUserData,
     getInventory, setInventory, addInventoryItem, updateInventoryItem, removeInventoryItem,
@@ -223,6 +247,7 @@ const Storage = (() => {
     isMade, setMade, getMadeDate,
     getNote, setNote,
     getCustomRecipes, addCustomRecipe, removeCustomRecipe,
-    exportJSON, importJSON
+    exportJSON, importJSON,
+    initSync
   };
 })();
