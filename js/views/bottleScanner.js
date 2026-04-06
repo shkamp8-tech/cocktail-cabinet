@@ -321,7 +321,7 @@ IMPORTANT: Only return valid JSON, no markdown, no explanation.`;
       const variant = document.getElementById('sr-variant').value.trim() || 'Origineel';
       const bottleSizeVal = parseInt(document.getElementById('sr-bottle-size').value) || 700;
       const fillVal = parseInt(document.getElementById('sr-fill').value) || 50;
-      const amount = fillVal; // stored as percentage
+      const amount = Math.round(bottleSizeVal * fillVal / 100);
       const ing = getIngredientById(ingredientId);
       const unit = ing ? ing.defaultUnit : 'ml';
 
