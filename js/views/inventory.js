@@ -212,10 +212,10 @@ const InventoryView = (() => {
             <input type="range" class="inv-range-slider inv-fill-range" min="0" max="100" step="5" value="${percent}" data-uid="${uid}">
           </div>
           <div class="inv-amount-controls">
-            <button class="inv-amount-btn" data-action="decrease" data-uid="${uid}" data-step="10">\u2212</button>
-            <input class="inv-amount-input" type="number" min="0" value="${item.amount}" data-uid="${uid}">
-            <span class="inv-amount-unit">${item.unit}</span>
-            <button class="inv-amount-btn" data-action="increase" data-uid="${uid}" data-step="10">+</button>
+            <button class="inv-amount-btn" data-action="decrease" data-uid="${uid}" data-step="5">\u2212</button>
+            <input class="inv-amount-input" type="number" min="0" max="100" step="5" value="${percent}" data-uid="${uid}" data-bottle="${bottleSize}">
+            <span class="inv-amount-unit">%</span>
+            <button class="inv-amount-btn" data-action="increase" data-uid="${uid}" data-step="5">+</button>
           </div>
           <button class="inv-edit-btn" data-uid="${uid}" title="Edit">\u270e</button>
           <button class="inv-delete-btn" data-uid="${uid}" title="Remove">\u2715</button>
@@ -321,35 +321,35 @@ const InventoryView = (() => {
       });
     });
 
-    // Amount buttons (+/-)
+    // Amount buttons (+/- in percentage steps)
     document.querySelectorAll('.inv-amount-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         const uid = btn.dataset.uid;
         const action = btn.dataset.action;
-        const step = parseInt(btn.dataset.step) || 10;
+        const step = parseInt(btn.dataset.step) || 5;
         const inventory = Storage.getInventory();
         const item = inventory.find(i => i.uid === uid);
         if (!item) return;
         const bottleSize = getBottleSize(item);
-        const newAmount = action === 'increase' ? item.amount + step : Math.max(0, item.amount - step);
+        const currentPct = getFillPercent(item.amount, bottleSize);
+        const newPct = action === 'increase' ? Math.min(100, currentPct + step) : Math.max(0, currentPct - step);
+        const newAmount = Math.round(bottleSize * newPct / 100);
         Storage.updateInventoryItem(uid, newAmount);
         updateItemRow(uid, newAmount, bottleSize);
         if (newAmount <= 0) render();
       });
     });
 
-    // Direct input change
+    // Direct input change (percentage-based)
     document.querySelectorAll('.inv-amount-input').forEach(input => {
       input.addEventListener('change', () => {
         const uid = input.dataset.uid;
-        const val = parseFloat(input.value) || 0;
-        const inventory = Storage.getInventory();
-        const item = inventory.find(i => i.uid === uid);
-        if (!item) return;
-        const bottleSize = getBottleSize(item);
-        Storage.updateInventoryItem(uid, val);
-        updateItemRow(uid, val, bottleSize);
-        if (val <= 0) render();
+        const pct = Math.min(100, Math.max(0, Math.round((parseFloat(input.value) || 0) / 5) * 5));
+        const bottleSize = parseInt(input.dataset.bottle) || 700;
+        const newAmount = Math.round(bottleSize * pct / 100);
+        Storage.updateInventoryItem(uid, newAmount);
+        updateItemRow(uid, newAmount, bottleSize);
+        if (newAmount <= 0) render();
       });
     });
 
@@ -409,7 +409,7 @@ const InventoryView = (() => {
     if (fill) { fill.style.width = percent + '%'; fill.style.background = fillColor; }
     if (label) { label.textContent = fillLabel + ' \u00b7 ' + percent + '%'; label.style.color = fillColor; }
     if (detail) detail.textContent = amount + ' / ' + bottleSize + ' ' + unit;
-    if (input) input.value = amount;
+    if (input) input.value = percent;
     if (slider) slider.value = percent;
   }
 

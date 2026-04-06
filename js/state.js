@@ -1,7 +1,8 @@
 /* ===== App State Management ===== */
 const AppState = (() => {
+  const savedView = (() => { try { return sessionStorage.getItem('cocktail-cabinet-view'); } catch(e) { return null; } })();
   let state = {
-    currentView: 'cocktails',   // 'cocktails' | 'inventory' | 'add-recipe'
+    currentView: savedView || 'cocktails',   // 'cocktails' | 'inventory' | 'add-recipe'
     filters: {
       search: '',
       flavors: [],              // active flavor filters
@@ -44,6 +45,7 @@ const AppState = (() => {
 
   function setView(view) {
     state.currentView = view;
+    try { sessionStorage.setItem('cocktail-cabinet-view', view); } catch(e) {}
     listeners.forEach(fn => fn(state));
   }
 

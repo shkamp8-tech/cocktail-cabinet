@@ -115,12 +115,12 @@ select.scanner-input {
 .scanner-viewfinder {
   position: relative;
   width: 100%;
-  max-width: 480px;
+  max-width: 380px;
   margin: 0 auto var(--space-md);
   border-radius: var(--radius-md);
   overflow: hidden;
   background: #000;
-  aspect-ratio: 4/3;
+  aspect-ratio: 3/4;
 }
 
 .scanner-viewfinder video {
@@ -131,7 +131,7 @@ select.scanner-input {
 
 .scanner-frame {
   position: absolute;
-  inset: 15%;
+  inset: 6%;
   border: 2px solid var(--gold);
   border-radius: var(--radius-md);
   opacity: 0.5;

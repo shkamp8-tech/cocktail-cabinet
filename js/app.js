@@ -26,6 +26,9 @@ const App = (() => {
     });
 
     // Initial render
+    const currentState = AppState.get();
+    updateNavActive(currentState.currentView);
+    updateFilterBar(currentState.currentView);
     renderCurrentView();
   }
 
