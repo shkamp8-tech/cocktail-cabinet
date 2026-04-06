@@ -188,13 +188,13 @@ const BottleScanner = (() => {
       .map(i => `${i.id}: ${i.name} (${i.category})`)
       .join('\n');
 
-    const systemPrompt = `You are an expert bartender and bottle recognition AI. The user sends a photo of a liquor bottle. Analyze the photo and return a JSON object with the following fields:
+    const systemPrompt = `You are an expert bartender and bottle recognition AI. The user sends a photo of a bottle — this can be a spirit, liqueur, or syrup (e.g. Monin, Teisseire). Analyze the photo and return a JSON object with the following fields:
 
 - "ingredientId": The best matching ID from the ingredient list below. If no exact match, pick the closest category or return null.
-- "name": The display name for this type of drink (e.g. "Melon Liqueur", "Bourbon", "Gin")
+- "name": The display name (e.g. "Melon Liqueur", "Bourbon", "Gin", "Simple Syrup", "Vanilla Syrup")
 - "category": Either "spirit", "liqueur", or "syrup"
-- "brand": The brand name visible on the bottle (e.g. "Midori", "Hendrick's", "Jack Daniel's")
-- "variant": The specific variant/edition/flavor if any (e.g. "Honey", "Apple", "Origineel"). Use "Origineel" if it's the standard/original version.
+- "brand": The brand name visible on the bottle (e.g. "Midori", "Hendrick's", "Monin", "Teisseire")
+- "variant": The specific variant/edition/flavor (e.g. "Honey", "Apple", "Vanilla", "Peach"). For syrups the flavor IS the variant — always fill this in. Use "Origineel" only if it's a plain/unflavored standard version.
 - "fillPercent": Estimated fill level of the bottle as a number 0-100, rounded to nearest 5. Estimate based on liquid visible in the bottle.
 - "bottleSize": Estimated bottle size in ml (common: 350, 500, 700, 750, 1000)
 - "confidence": Your confidence level: "high", "medium", or "low"

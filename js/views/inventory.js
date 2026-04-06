@@ -204,9 +204,12 @@ const InventoryView = (() => {
     const fillColor = getFillColor(percent);
     const uid = item.uid;
 
+    const isSyrup = item.ingredient.category === 'syrup';
     const variantLabel = item.variant && item.variant !== 'Origineel' ? item.variant : '';
     const brandLabel = item.brand || '';
-    const sub = [brandLabel, variantLabel].filter(Boolean).join(' · ');
+    const sub = isSyrup
+      ? [variantLabel, brandLabel].filter(Boolean).join(' · ')
+      : [brandLabel, variantLabel].filter(Boolean).join(' · ');
 
     return `
       <div class="inv-item" data-uid="${uid}">
@@ -325,12 +328,20 @@ const InventoryView = (() => {
   function rebindItemEvents() {
     // Tap item to expand/collapse
     document.querySelectorAll('.inv-item-compact').forEach(compact => {
-      compact.addEventListener('click', () => {
+      compact.addEventListener('click', (e) => {
+        e.stopPropagation();
         const item = compact.closest('.inv-item');
         const wasOpen = item.classList.contains('expanded');
         document.querySelectorAll('.inv-item.expanded').forEach(el => el.classList.remove('expanded'));
         if (!wasOpen) item.classList.add('expanded');
       });
+    });
+
+    // Click outside expanded item to collapse
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.inv-item.expanded')) {
+        document.querySelectorAll('.inv-item.expanded').forEach(el => el.classList.remove('expanded'));
+      }
     });
 
     // Inline +/- percentage buttons (in expanded view)
