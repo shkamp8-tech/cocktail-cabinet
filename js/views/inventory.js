@@ -184,7 +184,10 @@ const InventoryView = (() => {
     return categoryOrder
       .filter(cat => grouped[cat] && grouped[cat].length > 0)
       .map(cat => {
-        const items = grouped[cat];
+        const items = grouped[cat].sort((a, b) => {
+          if (a.ingredientId !== b.ingredientId) return a.ingredient.name.localeCompare(b.ingredient.name);
+          return (a.brand || '').localeCompare(b.brand || '') || (a.variant || '').localeCompare(b.variant || '');
+        });
         return `
           <div class="inv-category" id="inv-cat-${cat}" data-category="${cat}">
             <div class="inv-category-label">${INGREDIENT_CATEGORIES[cat]} <span class="inv-category-count">${items.length}</span></div>
