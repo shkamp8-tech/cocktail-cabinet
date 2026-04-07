@@ -33,7 +33,7 @@ const InventoryView = (() => {
     const container = document.getElementById('main-content');
     const inventory = Storage.getInventory();
 
-    const bottleCats = ['spirit', 'liqueur', 'syrup'];
+    const bottleCats = ['spirit', 'liqueur', 'syrup', 'bitters'];
     const bottleItems = inventory.filter(item => {
       const ing = getIngredientById(item.ingredientId);
       return ing && bottleCats.includes(ing.category);
@@ -146,7 +146,7 @@ const InventoryView = (() => {
   function renderCategories(inventory) {
     // Low stock summary view: flat sorted list of spirits/liqueurs/syrups
     if (summaryView === 'lowstock') {
-      const bottleCats = ['spirit', 'liqueur', 'syrup'];
+      const bottleCats = ['spirit', 'liqueur', 'syrup', 'bitters'];
       let items = [];
       inventory.forEach(item => {
         const ingredient = getIngredientById(item.ingredientId);
