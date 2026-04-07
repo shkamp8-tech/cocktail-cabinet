@@ -27,22 +27,25 @@ const InventoryView = (() => {
 
   let searchTerm = '';
   let stockFilter = ''; // '' | 'low' | 'empty' | 'full'
+  let summaryView = ''; // '' | 'lowstock'
 
   function render() {
     const container = document.getElementById('main-content');
     const inventory = Storage.getInventory();
 
-    const allCocktails = [...COCKTAILS, ...Storage.getCustomRecipes()];
-    let canMake = 0;
-    allCocktails.forEach(c => {
-      if (Availability.check(c, inventory).status === 'available') canMake++;
+    const bottleCats = ['spirit', 'liqueur', 'syrup'];
+    const bottleItems = inventory.filter(item => {
+      const ing = getIngredientById(item.ingredientId);
+      return ing && bottleCats.includes(ing.category);
     });
 
-    // Low stock count
+    // Restock count (below 50%) and low stock count
+    let restockCount = 0;
     let lowCount = 0;
-    inventory.forEach(item => {
+    bottleItems.forEach(item => {
       const bs = getBottleSize(item);
       const pct = getFillPercent(item.amount, bs);
+      if (pct < 50 && pct > 0) restockCount++;
       if (pct <= 25 && pct > 0) lowCount++;
     });
 
@@ -70,15 +73,15 @@ const InventoryView = (() => {
         </div>
 
         <div class="inv-summary">
-          <div class="inv-summary-stat">
-            <div class="stat-number">${inventory.length}</div>
+          <div class="inv-summary-stat clickable" data-summary="items">
+            <div class="stat-number">${bottleItems.length}</div>
             <div class="stat-label">Items</div>
           </div>
           <div class="inv-summary-stat">
-            <div class="stat-number" style="color:var(--turquoise)">${canMake}</div>
-            <div class="stat-label">Can Make</div>
+            <div class="stat-number" style="color:var(--turquoise)">${restockCount}</div>
+            <div class="stat-label">Bijvullen</div>
           </div>
-          <div class="inv-summary-stat">
+          <div class="inv-summary-stat clickable${summaryView === 'lowstock' ? ' active' : ''}" data-summary="lowstock">
             <div class="stat-number" style="color:var(--coral)">${lowCount}</div>
             <div class="stat-label">Low Stock</div>
           </div>
@@ -88,12 +91,12 @@ const InventoryView = (() => {
           <div class="inv-search-wrap">
             <input type="text" id="inv-search" class="inv-search" placeholder="Search inventory..." value="${searchTerm}">
           </div>
-          <div class="inv-stock-filters">
+          <div class="inv-stock-filters${summaryView === 'lowstock' ? ' hidden' : ''}" id="inv-stock-filters">
             <button class="inv-stock-chip${stockFilter === '' ? ' active' : ''}" data-stock="">Alles</button>
             <button class="inv-stock-chip${stockFilter === 'low' ? ' active' : ''}" data-stock="low">⚠ Bijhalen</button>
             <button class="inv-stock-chip${stockFilter === 'almost' ? ' active' : ''}" data-stock="almost">Bijna leeg</button>
           </div>
-          ${catNav ? `<div class="inv-cat-nav">${catNav}</div>` : ''}
+          ${catNav ? `<div class="inv-cat-nav${summaryView === 'lowstock' ? ' hidden' : ''}" id="inv-cat-nav">${catNav}</div>` : ''}
         </div>
 
         <div id="inv-add-panel" class="inv-add-panel hidden">
@@ -158,6 +161,33 @@ const InventoryView = (() => {
   }
 
   function renderCategories(inventory) {
+    // Low stock summary view: flat sorted list of spirits/liqueurs/syrups
+    if (summaryView === 'lowstock') {
+      const bottleCats = ['spirit', 'liqueur', 'syrup'];
+      let items = [];
+      inventory.forEach(item => {
+        const ingredient = getIngredientById(item.ingredientId);
+        if (!ingredient || !bottleCats.includes(ingredient.category)) return;
+        if (searchTerm) {
+          const q = searchTerm.toLowerCase();
+          const haystack = (ingredient.name + ' ' + (item.brand || '') + ' ' + (item.variant || '')).toLowerCase();
+          if (!haystack.includes(q)) return;
+        }
+        const bs = getBottleSize(item);
+        const pct = getFillPercent(item.amount, bs);
+        items.push({ ...item, ingredient, _pct: pct });
+      });
+      items.sort((a, b) => a._pct - b._pct);
+      if (items.length === 0) return '';
+      return `
+        <div class="inv-category">
+          <div class="inv-category-label">Low Stock <span class="inv-category-count">${items.length}</span></div>
+          <div class="inv-category-body inv-grid">
+            ${items.map(renderItem).join('')}
+          </div>
+        </div>`;
+    }
+
     const grouped = {};
     inventory.forEach(item => {
       const ingredient = getIngredientById(item.ingredientId);
@@ -211,8 +241,9 @@ const InventoryView = (() => {
       ? [variantLabel, brandLabel].filter(Boolean).join(' · ')
       : [brandLabel, variantLabel].filter(Boolean).join(' · ');
 
+    const fullClass = percent >= 100 ? ' inv-item-full' : '';
     return `
-      <div class="inv-item" data-uid="${uid}">
+      <div class="inv-item${fullClass}" data-uid="${uid}">
         <div class="inv-item-compact">
           <div class="inv-item-info">
             <div class="inv-item-name">${item.ingredient.name}</div>
@@ -265,10 +296,40 @@ const InventoryView = (() => {
     // Stock filter chips
     document.querySelectorAll('.inv-stock-chip').forEach(chip => {
       chip.addEventListener('click', () => {
+        summaryView = '';
         stockFilter = chip.dataset.stock;
         const catContainer = document.getElementById('inv-categories');
         if (catContainer) catContainer.innerHTML = renderCategories(Storage.getInventory());
         document.querySelectorAll('.inv-stock-chip').forEach(c => c.classList.toggle('active', c.dataset.stock === stockFilter));
+        document.querySelectorAll('.inv-summary-stat').forEach(s => s.classList.remove('active'));
+        rebindItemEvents();
+      });
+    });
+
+    // Summary stat clicks (Items = reset to default, Low Stock = flat sorted view)
+    document.querySelectorAll('.inv-summary-stat.clickable').forEach(stat => {
+      stat.addEventListener('click', () => {
+        const view = stat.dataset.summary;
+        if (view === 'items') {
+          summaryView = '';
+          stockFilter = '';
+          document.querySelectorAll('.inv-stock-chip').forEach(c => c.classList.toggle('active', c.dataset.stock === ''));
+        } else if (view === 'lowstock') {
+          summaryView = summaryView === 'lowstock' ? '' : 'lowstock';
+          if (summaryView === '') {
+            stockFilter = '';
+            document.querySelectorAll('.inv-stock-chip').forEach(c => c.classList.toggle('active', c.dataset.stock === ''));
+          }
+        }
+        const catContainer = document.getElementById('inv-categories');
+        if (catContainer) catContainer.innerHTML = renderCategories(Storage.getInventory());
+        document.querySelectorAll('.inv-summary-stat.clickable').forEach(s => {
+          s.classList.toggle('active', s.dataset.summary === 'lowstock' && summaryView === 'lowstock');
+        });
+        const stockFiltersEl = document.getElementById('inv-stock-filters');
+        const catNavEl = document.getElementById('inv-cat-nav');
+        if (stockFiltersEl) stockFiltersEl.classList.toggle('hidden', summaryView === 'lowstock');
+        if (catNavEl) catNavEl.classList.toggle('hidden', summaryView === 'lowstock');
         rebindItemEvents();
       });
     });

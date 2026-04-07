@@ -173,6 +173,12 @@
   cursor: default;
 }
 
+/* Full bottles (100%) — subtle filled card */
+.inv-item.inv-item-full {
+  background: rgba(37, 217, 190, 0.08);
+  border-color: rgba(37, 217, 190, 0.2);
+}
+
 /* Compact view: name + percentage + mini bar */
 .inv-item-compact {
   display: grid;
@@ -583,6 +589,20 @@
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.5px;
+}
+
+.inv-summary-stat.clickable {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: opacity var(--transition-fast);
+}
+
+.inv-summary-stat.clickable:hover {
+  opacity: 0.7;
+}
+
+.inv-summary-stat.active .stat-label {
+  color: var(--coral);
 }
 
 /* ===== Add Recipe Form ===== */
