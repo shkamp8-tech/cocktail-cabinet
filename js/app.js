@@ -59,6 +59,8 @@ const App = (() => {
     const filtered = Filters.apply(allCocktails);
     if (displayMode === 'canvas') {
       CocktailCanvas.render(filtered);
+    } else if (displayMode === 'quiz') {
+      CocktailQuiz.render(allCocktails);
     } else {
       CocktailGrid.render(filtered);
     }

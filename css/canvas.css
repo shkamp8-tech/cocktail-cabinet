@@ -64,7 +64,7 @@
 .canvas-area {
   position: relative;
   width: 100%;
-  min-height: 500px;
+  min-height: 70vh;
   background:
     repeating-linear-gradient(0deg, transparent, transparent 24%, rgba(232, 197, 71, 0.04) 25%),
     repeating-linear-gradient(90deg, transparent, transparent 24%, rgba(232, 197, 71, 0.04) 25%);
@@ -211,7 +211,7 @@
 /* Mobile adjustments */
 @media (max-width: 640px) {
   .canvas-area {
-    min-height: 350px;
+    min-height: 60vh;
   }
 
   .canvas-dot {
@@ -232,4 +232,39 @@
     width: 100%;
     justify-content: space-between;
   }
+}
+
+/* Canvas flavor axis markers */
+.canvas-x-markers {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 2%;
+}
+
+.canvas-x-marker {
+  font-size: 0.5rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  opacity: 0.5;
+}
+
+.canvas-y-markers {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: calc(100% + 4px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 2% 0;
+}
+
+.canvas-y-marker {
+  font-size: 0.5rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  opacity: 0.5;
+  white-space: nowrap;
 }

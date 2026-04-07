@@ -37,9 +37,9 @@ const CocktailCanvas = (() => {
 
   let currentAxis = 'flavor-strength'; // default
   const AXES = {
-    'flavor-strength': { label: 'Smaak × Sterkte', xLabel: 'Zacht → Bold', yLabel: 'Light → Strong', xFn: cocktailX, yFn: cocktailY },
-    'strength-only': { label: 'Sterkte', xLabel: '', yLabel: 'Light → Very Strong', xFn: (_c, i, n) => ((i % 5) + 1) / 6, yFn: cocktailY },
-    'flavor-only': { label: 'Smaakprofiel', xLabel: 'Zacht → Bold', yLabel: '', xFn: cocktailX, yFn: (_c, i, n) => 0.2 + (Math.floor(i / 5) * 0.15) }
+    'flavor-strength': { label: 'Flavor × Strength', xLabel: 'Soft → Bold', yLabel: 'Light → Strong', xFn: cocktailX, yFn: cocktailY },
+    'strength-only': { label: 'Strength', xLabel: '', yLabel: 'Light → Very Strong', xFn: (_c, i, n) => ((i % 5) + 1) / 6, yFn: cocktailY },
+    'flavor-only': { label: 'Flavor Profile', xLabel: 'Soft → Bold', yLabel: '', xFn: cocktailX, yFn: (_c, i, n) => 0.2 + (Math.floor(i / 5) * 0.15) }
   };
 
   /* ---------- render ---------- */
@@ -62,9 +62,20 @@ const CocktailCanvas = (() => {
     // De-overlap: nudge cards that are too close
     deOverlap(cards);
 
+    const xMarkers = axis.xLabel ? [
+      { label: 'Sweet', color: FLAVOR_COLORS.sweet },
+      { label: 'Tropical', color: FLAVOR_COLORS.tropical },
+      { label: 'Fruity', color: FLAVOR_COLORS.fruity },
+      { label: 'Sour', color: FLAVOR_COLORS.sour },
+      { label: 'Herbal', color: FLAVOR_COLORS.herbal },
+      { label: 'Spicy', color: FLAVOR_COLORS.spicy },
+      { label: 'Bitter', color: FLAVOR_COLORS.bitter },
+      { label: 'Bold', color: FLAVOR_COLORS['spirit-forward'] }
+    ] : [];
+
     container.innerHTML = `
       <div class="canvas-controls">
-        <label class="canvas-axis-label">Weergave:</label>
+        <label class="canvas-axis-label">View:</label>
         <select id="canvas-axis-select" class="canvas-axis-select">
           ${Object.keys(AXES).map(k => `<option value="${k}" ${k === currentAxis ? 'selected' : ''}>${AXES[k].label}</option>`).join('')}
         </select>
@@ -74,8 +85,9 @@ const CocktailCanvas = (() => {
         <div class="canvas-area" id="canvas-area">
           ${cards.map(c => renderDot(c)).join('')}
         </div>
-        ${axis.xLabel ? `<div class="canvas-x-axis"><span>${axis.xLabel}</span></div>` : ''}
       </div>
+      ${xMarkers.length ? `<div class="canvas-x-markers">${xMarkers.map(m => `<span class="canvas-x-marker" style="color:${m.color}">${m.label}</span>`).join('')}</div>` : ''}
+      ${axis.xLabel ? `<div class="canvas-x-axis"><span>${axis.xLabel}</span></div>` : ''}
     `;
 
     // Bind axis select

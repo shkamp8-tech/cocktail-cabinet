@@ -1,0 +1,218 @@
+/* ===== Cocktail Quiz ===== */
+
+.quiz-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-lg);
+  max-width: 500px;
+  margin: 0 auto;
+  padding: var(--space-lg) var(--space-md);
+}
+
+.quiz-progress {
+  width: 100%;
+  height: 4px;
+  background: var(--bg-tertiary);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.quiz-progress-bar {
+  height: 100%;
+  background: var(--gold);
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
+
+.quiz-step {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.quiz-question {
+  font-family: var(--font-heading);
+  font-size: 1.3rem;
+  color: var(--gold);
+  text-align: center;
+}
+
+.quiz-answers {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.quiz-answer {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 18px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--gold-dim);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.quiz-answer:hover {
+  border-color: var(--gold);
+  background: rgba(232, 197, 71, 0.06);
+}
+
+.quiz-answer:active {
+  transform: scale(0.98);
+  background: var(--gold-dim);
+}
+
+.quiz-answer-label {
+  font-family: var(--font-heading);
+  font-size: 1rem;
+  color: var(--gold);
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid var(--gold);
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+}
+
+.quiz-answer-text {
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  color: var(--text-primary);
+}
+
+.quiz-back {
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px 12px;
+  transition: color var(--transition-fast);
+}
+
+.quiz-back:hover {
+  color: var(--gold);
+}
+
+/* Results */
+.quiz-results {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.quiz-result-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--gold-dim);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.quiz-result-card:hover {
+  border-color: var(--gold);
+  background: rgba(232, 197, 71, 0.04);
+}
+
+.quiz-result-card.can-make {
+  border-left: 3px solid var(--turquoise);
+}
+
+.quiz-result-card.partial {
+  border-left: 3px solid var(--gold);
+}
+
+.quiz-result-card.missing {
+  border-left: 3px solid var(--coral);
+  opacity: 0.7;
+}
+
+.quiz-result-rank {
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  color: var(--gold);
+  min-width: 30px;
+}
+
+.quiz-result-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.quiz-result-name {
+  font-family: var(--font-heading);
+  font-size: 0.95rem;
+  color: var(--text-primary);
+}
+
+.quiz-result-meta {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.quiz-result-strength {
+  font-size: 0.6rem;
+  color: var(--text-muted);
+  letter-spacing: 2px;
+}
+
+.quiz-flavor {
+  font-size: 0.55rem;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: var(--radius-pill);
+  background: rgba(232, 197, 71, 0.1);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.quiz-result-avail {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.quiz-result-card.can-make .quiz-result-avail {
+  color: var(--turquoise);
+}
+
+.quiz-result-card.partial .quiz-result-avail {
+  color: var(--gold);
+}
+
+.quiz-restart {
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 10px 24px;
+  background: var(--gold-dim);
+  color: var(--gold);
+  border: 1px solid var(--gold);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.quiz-restart:hover {
+  background: var(--gold);
+  color: var(--text-dark);
+}

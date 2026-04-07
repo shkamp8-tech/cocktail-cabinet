@@ -265,6 +265,14 @@
   text-align: center;
 }
 
+.inv-item-ml {
+  font-size: 0.55rem;
+  color: var(--text-muted);
+  min-width: 32px;
+  text-align: center;
+  grid-column: 2;
+}
+
 .inv-mini-bar {
   grid-column: 1 / -1;
   height: 4px;

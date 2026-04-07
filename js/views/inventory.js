@@ -231,6 +231,7 @@ const InventoryView = (() => {
             ${sub ? `<div class="inv-item-sub">${sub}</div>` : ''}
           </div>
           <span class="inv-item-pct" style="color:${fillColor}" data-uid="${uid}">${percent}%</span>
+          <span class="inv-item-ml" data-uid="${uid}">${item.amount}/${bottleSize}</span>
           <div class="inv-mini-bar"><div class="inv-mini-fill" style="width:${percent}%;background:${fillColor}"></div></div>
         </div>
         <div class="inv-item-expand" data-uid="${uid}">
@@ -443,6 +444,8 @@ const InventoryView = (() => {
     const miniFill = row.querySelector('.inv-mini-fill');
     const detail = row.querySelector('.inv-bottle-detail');
     if (pctEl) { pctEl.textContent = percent + '%'; pctEl.style.color = fillColor; }
+    const mlEl = row.querySelector('.inv-item-ml');
+    if (mlEl) mlEl.textContent = amount + '/' + bottleSize;
     if (expandPct) { expandPct.textContent = percent + '%'; }
     if (miniFill) { miniFill.style.width = percent + '%'; miniFill.style.background = fillColor; }
     if (detail) detail.textContent = amount + ' / ' + bottleSize + ' ' + unit;
