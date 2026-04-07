@@ -135,10 +135,29 @@
   font-family: var(--font-heading);
   font-size: 0.85rem;
   color: var(--gold);
-  padding: 0 2px;
+  padding: 4px 2px;
   display: flex;
   align-items: center;
   gap: var(--space-sm);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.inv-category-label:hover {
+  opacity: 0.8;
+}
+
+.inv-cat-chevron {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  transition: transform var(--transition-fast);
+  width: 10px;
+  display: inline-block;
+}
+
+.inv-category.collapsed .inv-category-body {
+  display: none;
 }
 
 .inv-category-count {

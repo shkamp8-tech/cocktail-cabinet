@@ -26,8 +26,8 @@ const InventoryView = (() => {
   }
 
   let searchTerm = '';
-  let stockFilter = ''; // '' | 'low' | 'empty' | 'full'
   let summaryView = ''; // '' | 'lowstock'
+  const collapsedCats = new Set();
 
   function render() {
     const container = document.getElementById('main-content');
@@ -49,25 +49,14 @@ const InventoryView = (() => {
       if (pct <= 25 && pct > 0) lowCount++;
     });
 
-    // Category counts for nav
-    const catCounts = {};
-    inventory.forEach(item => {
-      const ing = getIngredientById(item.ingredientId);
-      if (ing) catCounts[ing.category] = (catCounts[ing.category] || 0) + 1;
-    });
 
-    const categoryOrder = ['spirit', 'liqueur', 'mixer', 'juice', 'syrup', 'bitters', 'fresh'];
-    const catNav = categoryOrder
-      .filter(c => catCounts[c])
-      .map(c => `<a class="inv-nav-link" href="#inv-cat-${c}">${INGREDIENT_CATEGORIES[c]} <span class="inv-nav-count">${catCounts[c]}</span></a>`)
-      .join('');
 
     container.innerHTML = `
       <div class="inventory-page">
         <div class="inventory-header">
           <h2>Your Inventory</h2>
           <div class="inventory-actions">
-            <button class="inventory-btn scan-btn" id="inv-scan-btn">📷 Scan Fles</button>
+            <button class="inventory-btn scan-btn" id="inv-scan-btn">📷 Scan Bottle</button>
             <button class="inventory-btn" id="inv-add-toggle">+ Add</button>
           </div>
         </div>
@@ -79,7 +68,7 @@ const InventoryView = (() => {
           </div>
           <div class="inv-summary-stat">
             <div class="stat-number" style="color:var(--turquoise)">${restockCount}</div>
-            <div class="stat-label">Bijvullen</div>
+            <div class="stat-label">Restock</div>
           </div>
           <div class="inv-summary-stat clickable${summaryView === 'lowstock' ? ' active' : ''}" data-summary="lowstock">
             <div class="stat-number" style="color:var(--coral)">${lowCount}</div>
@@ -91,12 +80,6 @@ const InventoryView = (() => {
           <div class="inv-search-wrap">
             <input type="text" id="inv-search" class="inv-search" placeholder="Search inventory..." value="${searchTerm}">
           </div>
-          <div class="inv-stock-filters${summaryView === 'lowstock' ? ' hidden' : ''}" id="inv-stock-filters">
-            <button class="inv-stock-chip${stockFilter === '' ? ' active' : ''}" data-stock="">Alles</button>
-            <button class="inv-stock-chip${stockFilter === 'low' ? ' active' : ''}" data-stock="low">⚠ Bijhalen</button>
-            <button class="inv-stock-chip${stockFilter === 'almost' ? ' active' : ''}" data-stock="almost">Bijna leeg</button>
-          </div>
-          ${catNav ? `<div class="inv-cat-nav${summaryView === 'lowstock' ? ' hidden' : ''}" id="inv-cat-nav">${catNav}</div>` : ''}
         </div>
 
         <div id="inv-add-panel" class="inv-add-panel hidden">
@@ -152,8 +135,8 @@ const InventoryView = (() => {
           <input type="text" id="inv-add-brand" placeholder="e.g. Hendrick's">
         </div>
         <div class="inv-add-field" style="flex:1;min-width:100px">
-          <label>Variant / Smaak</label>
-          <input type="text" id="inv-add-variant" value="Origineel" placeholder="e.g. Vanille, Origineel">
+          <label>Variant / Flavor</label>
+          <input type="text" id="inv-add-variant" value="Origineel" placeholder="e.g. Vanilla, Original">
         </div>
         <button type="submit" class="inventory-btn">Add</button>
       </form>
@@ -197,13 +180,6 @@ const InventoryView = (() => {
         const haystack = (ingredient.name + ' ' + (item.brand || '') + ' ' + (item.variant || '')).toLowerCase();
         if (!haystack.includes(q)) return;
       }
-      // Stock filter
-      if (stockFilter) {
-        const bs = getBottleSize(item);
-        const pct = getFillPercent(item.amount, bs);
-        if (stockFilter === 'low' && pct > 25) return;
-        if (stockFilter === 'almost' && pct > 45) return;
-      }
       const cat = ingredient.category;
       if (!grouped[cat]) grouped[cat] = [];
       grouped[cat].push({ ...item, ingredient });
@@ -218,9 +194,14 @@ const InventoryView = (() => {
           if (a.ingredientId !== b.ingredientId) return a.ingredient.name.localeCompare(b.ingredient.name);
           return (a.brand || '').localeCompare(b.brand || '') || (a.variant || '').localeCompare(b.variant || '');
         });
+        const collapsed = collapsedCats.has(cat);
+        const chevron = collapsed ? '&#9656;' : '&#9662;';
         return `
-          <div class="inv-category" id="inv-cat-${cat}" data-category="${cat}">
-            <div class="inv-category-label">${INGREDIENT_CATEGORIES[cat]} <span class="inv-category-count">${items.length}</span></div>
+          <div class="inv-category${collapsed ? ' collapsed' : ''}" id="inv-cat-${cat}" data-category="${cat}">
+            <div class="inv-category-label" data-cat-toggle="${cat}">
+              <span class="inv-cat-chevron">${chevron}</span>
+              ${INGREDIENT_CATEGORIES[cat]} <span class="inv-category-count">${items.length}</span>
+            </div>
             <div class="inv-category-body inv-grid">
               ${items.map(renderItem).join('')}
             </div>
@@ -261,7 +242,7 @@ const InventoryView = (() => {
           <div class="inv-bottle-detail">${item.amount} / ${bottleSize} ${item.unit}</div>
           <div class="inv-expand-actions">
             <button class="inv-edit-btn" data-uid="${uid}" title="Edit">\u270e Edit</button>
-            <button class="inv-delete-btn" data-uid="${uid}" title="Remove">\u2715 Verwijderen</button>
+            <button class="inv-delete-btn" data-uid="${uid}" title="Remove">\u2715 Remove</button>
           </div>
         </div>
       </div>`;
@@ -283,53 +264,20 @@ const InventoryView = (() => {
       });
     }
 
-    // Category nav smooth scroll
-    document.querySelectorAll('.inv-nav-link').forEach(link => {
-      link.addEventListener('click', (e) => {
-        e.preventDefault();
-        const id = link.getAttribute('href').slice(1);
-        const el = document.getElementById(id);
-        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      });
-    });
-
-    // Stock filter chips
-    document.querySelectorAll('.inv-stock-chip').forEach(chip => {
-      chip.addEventListener('click', () => {
-        summaryView = '';
-        stockFilter = chip.dataset.stock;
-        const catContainer = document.getElementById('inv-categories');
-        if (catContainer) catContainer.innerHTML = renderCategories(Storage.getInventory());
-        document.querySelectorAll('.inv-stock-chip').forEach(c => c.classList.toggle('active', c.dataset.stock === stockFilter));
-        document.querySelectorAll('.inv-summary-stat').forEach(s => s.classList.remove('active'));
-        rebindItemEvents();
-      });
-    });
-
     // Summary stat clicks (Items = reset to default, Low Stock = flat sorted view)
     document.querySelectorAll('.inv-summary-stat.clickable').forEach(stat => {
       stat.addEventListener('click', () => {
         const view = stat.dataset.summary;
         if (view === 'items') {
           summaryView = '';
-          stockFilter = '';
-          document.querySelectorAll('.inv-stock-chip').forEach(c => c.classList.toggle('active', c.dataset.stock === ''));
         } else if (view === 'lowstock') {
           summaryView = summaryView === 'lowstock' ? '' : 'lowstock';
-          if (summaryView === '') {
-            stockFilter = '';
-            document.querySelectorAll('.inv-stock-chip').forEach(c => c.classList.toggle('active', c.dataset.stock === ''));
-          }
         }
         const catContainer = document.getElementById('inv-categories');
         if (catContainer) catContainer.innerHTML = renderCategories(Storage.getInventory());
         document.querySelectorAll('.inv-summary-stat.clickable').forEach(s => {
           s.classList.toggle('active', s.dataset.summary === 'lowstock' && summaryView === 'lowstock');
         });
-        const stockFiltersEl = document.getElementById('inv-stock-filters');
-        const catNavEl = document.getElementById('inv-cat-nav');
-        if (stockFiltersEl) stockFiltersEl.classList.toggle('hidden', summaryView === 'lowstock');
-        if (catNavEl) catNavEl.classList.toggle('hidden', summaryView === 'lowstock');
         rebindItemEvents();
       });
     });
@@ -386,7 +334,26 @@ const InventoryView = (() => {
     rebindItemEvents();
   }
 
+  function bindCategoryToggles() {
+    document.querySelectorAll('.inv-category-label[data-cat-toggle]').forEach(label => {
+      label.addEventListener('click', () => {
+        const cat = label.dataset.catToggle;
+        const section = label.closest('.inv-category');
+        if (collapsedCats.has(cat)) {
+          collapsedCats.delete(cat);
+          section.classList.remove('collapsed');
+        } else {
+          collapsedCats.add(cat);
+          section.classList.add('collapsed');
+        }
+        const chevron = label.querySelector('.inv-cat-chevron');
+        if (chevron) chevron.innerHTML = collapsedCats.has(cat) ? '&#9656;' : '&#9662;';
+      });
+    });
+  }
+
   function rebindItemEvents() {
+    bindCategoryToggles();
     // Tap item to expand/collapse
     document.querySelectorAll('.inv-item-compact').forEach(compact => {
       compact.addEventListener('click', (e) => {
@@ -439,7 +406,7 @@ const InventoryView = (() => {
         form.innerHTML = `
           <div class="inv-edit-fields">
             <label>Brand <input type="text" class="inv-edit-input" data-field="brand" value="${item.brand || ''}"></label>
-            <label>Variant / Smaak <input type="text" class="inv-edit-input" data-field="variant" value="${item.variant || ''}"></label>
+            <label>Variant / Flavor <input type="text" class="inv-edit-input" data-field="variant" value="${item.variant || ''}"></label>
             <button class="inv-edit-save inventory-btn">Save</button>
             <button class="inv-edit-cancel inv-amount-btn">&#10005;</button>
           </div>`;
