@@ -1,16 +1,14 @@
 /* ===== Cocktail Canvas / Taste Map View ===== */
 const CocktailCanvas = (() => {
 
-  /* ---------- flavour-axis layout helpers ---------- */
+  /* ---------- flavour helpers ---------- */
 
-  // Map each flavour to a position on the X-axis (0 = sweet/soft, 1 = bitter/bold)
   const FLAVOR_X = {
-    sweet: 0.10, creamy: 0.15, tropical: 0.25, fruity: 0.30,
-    refreshing: 0.40, sour: 0.50, herbal: 0.60,
-    spicy: 0.70, bitter: 0.80, 'spirit-forward': 0.90
+    sweet: 0.08, creamy: 0.14, tropical: 0.24, fruity: 0.32,
+    refreshing: 0.42, sour: 0.52, herbal: 0.62,
+    spicy: 0.74, bitter: 0.84, 'spirit-forward': 0.92
   };
 
-  // Map each flavour to a visual colour for the dot/badge (CSS variable fallback)
   const FLAVOR_COLORS = {
     sweet: '#f7c948', creamy: '#ffe4b0', tropical: '#25d9be',
     fruity: '#ff6b6b', refreshing: '#5bc9f5', sour: '#a8e06e',
@@ -18,28 +16,23 @@ const CocktailCanvas = (() => {
     'spirit-forward': '#e8c547'
   };
 
-  /* Position helpers */
-
-  function cocktailX(cocktail) {
-    // Average x position of all its flavours
-    if (!cocktail.flavors || cocktail.flavors.length === 0) return 0.5;
-    const total = cocktail.flavors.reduce((sum, f) => sum + (FLAVOR_X[f] ?? 0.5), 0);
-    return total / cocktail.flavors.length;
+  function cocktailX(c) {
+    if (!c.flavors || c.flavors.length === 0) return 0.5;
+    return c.flavors.reduce((s, f) => s + (FLAVOR_X[f] ?? 0.5), 0) / c.flavors.length;
   }
 
-  function cocktailY(cocktail) {
-    // strength 1-4  →  y 0.85 (bottom, light) → 0.10 (top, strong)
-    const s = cocktail.strength || 2;
+  function cocktailY(c) {
+    const s = c.strength || 2;
     return 1 - ((s - 1) / 3) * 0.75 - 0.10;
   }
 
-  /* ---------- axis selector ---------- */
+  /* ---------- axis modes ---------- */
 
-  let currentAxis = 'flavor-strength'; // default
+  let currentAxis = 'flavor-strength';
   const AXES = {
-    'flavor-strength': { label: 'Flavor × Strength', xLabel: 'Soft → Bold', yLabel: 'Light → Strong', xFn: cocktailX, yFn: cocktailY },
-    'strength-only': { label: 'Strength', xLabel: '', yLabel: 'Light → Very Strong', xFn: (_c, i, n) => ((i % 5) + 1) / 6, yFn: cocktailY },
-    'flavor-only': { label: 'Flavor Profile', xLabel: 'Soft → Bold', yLabel: '', xFn: cocktailX, yFn: (_c, i, n) => 0.2 + (Math.floor(i / 5) * 0.15) }
+    'flavor-strength': { label: 'Flavor × Strength', xLabel: 'Sweet → Bold', yLabel: 'Light → Strong', xFn: cocktailX, yFn: cocktailY },
+    'strength-only':   { label: 'Strength',          xLabel: '',              yLabel: 'Light → Strong', xFn: (_c, i) => ((i % 6) + 1) / 7, yFn: cocktailY },
+    'flavor-only':     { label: 'Flavor Profile',    xLabel: 'Sweet → Bold', yLabel: '',               xFn: cocktailX, yFn: (_c, i) => 0.15 + (Math.floor(i / 6) * 0.12) }
   };
 
   /* ---------- render ---------- */
@@ -51,7 +44,6 @@ const CocktailCanvas = (() => {
     const axis = AXES[currentAxis];
     const inventory = Storage.getInventory();
 
-    // Build positioned cards
     const cards = cocktails.map((c, i) => {
       const rawX = axis.xFn(c, i, cocktails.length);
       const rawY = axis.yFn(c, i, cocktails.length);
@@ -59,7 +51,6 @@ const CocktailCanvas = (() => {
       return { cocktail: c, x: rawX, y: rawY, avail };
     });
 
-    // De-overlap: nudge cards that are too close
     deOverlap(cards);
 
     const xMarkers = axis.xLabel ? [
@@ -83,90 +74,83 @@ const CocktailCanvas = (() => {
       <div class="canvas-wrapper">
         ${axis.yLabel ? `<div class="canvas-y-axis"><span>${axis.yLabel}</span></div>` : ''}
         <div class="canvas-area" id="canvas-area">
-          ${cards.map(c => renderDot(c)).join('')}
+          ${cards.map(c => renderCard(c)).join('')}
         </div>
       </div>
       ${xMarkers.length ? `<div class="canvas-x-markers">${xMarkers.map(m => `<span class="canvas-x-marker" style="color:${m.color}">${m.label}</span>`).join('')}</div>` : ''}
       ${axis.xLabel ? `<div class="canvas-x-axis"><span>${axis.xLabel}</span></div>` : ''}
     `;
 
-    // Bind axis select
     const sel = document.getElementById('canvas-axis-select');
-    if (sel) {
-      sel.addEventListener('change', () => {
-        currentAxis = sel.value;
-        render(cocktails);
-      });
-    }
+    if (sel) sel.addEventListener('change', () => { currentAxis = sel.value; render(cocktails); });
 
-    // Bind card clicks (open detail modal)
-    document.querySelectorAll('.canvas-dot').forEach(dot => {
-      dot.addEventListener('click', () => {
-        const id = dot.dataset.id;
-        if (id) {
-          document.dispatchEvent(new CustomEvent('open-cocktail', { detail: { id } }));
-        }
+    document.querySelectorAll('.canvas-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const id = card.dataset.id;
+        if (id) document.dispatchEvent(new CustomEvent('open-cocktail', { detail: { id } }));
       });
     });
 
-    // Stagger animation
     requestAnimationFrame(() => {
-      document.querySelectorAll('.canvas-dot').forEach((d, i) => {
-        setTimeout(() => d.classList.add('visible'), i * 30);
+      document.querySelectorAll('.canvas-card').forEach((d, i) => {
+        setTimeout(() => d.classList.add('visible'), i * 35);
       });
     });
   }
 
-  /* ---------- card dot ---------- */
+  /* ---------- small card ---------- */
 
-  function renderDot(card) {
+  function renderCard(card) {
     const c = card.cocktail;
     const left = (card.x * 100).toFixed(1);
-    const top = (card.y * 100).toFixed(1);
+    const top  = (card.y * 100).toFixed(1);
     const availClass = card.avail.status === 'available' ? 'can-make' :
                        card.avail.status === 'partial' ? 'partial' : 'missing';
     const primaryFlavor = c.flavors && c.flavors[0] ? c.flavors[0] : 'sweet';
-    const dotColor = FLAVOR_COLORS[primaryFlavor] || '#e8c547';
+    const accentColor = FLAVOR_COLORS[primaryFlavor] || '#e8c547';
     const strengthDots = '●'.repeat(c.strength || 2) + '○'.repeat(4 - (c.strength || 2));
-    const flavorBadges = (c.flavors || []).map(f =>
-      `<span class="canvas-flavor" style="background:${FLAVOR_COLORS[f] || '#555'}30;color:${FLAVOR_COLORS[f] || '#aaa'}">${f}</span>`
+    const topFlavors = (c.flavors || []).slice(0, 2);
+    const flavorBadges = topFlavors.map(f =>
+      `<span class="canvas-card-flavor" style="background:${FLAVOR_COLORS[f] || '#555'}25;color:${FLAVOR_COLORS[f] || '#aaa'}">${f}</span>`
     ).join('');
 
     return `
-      <div class="canvas-dot ${availClass}" data-id="${c.id}"
-           style="left:${left}%;top:${top}%;">
-        <div class="canvas-dot-ring" style="border-color:${dotColor}"></div>
-        <div class="canvas-tooltip">
-          <strong>${c.name}</strong>
-          <span class="canvas-strength">${strengthDots}</span>
-          <div class="canvas-flavors">${flavorBadges}</div>
+      <div class="canvas-card ${availClass}" data-id="${c.id}"
+           style="left:${left}%;top:${top}%;--accent:${accentColor}">
+        <div class="canvas-card-accent"></div>
+        <div class="canvas-card-name">${c.name}</div>
+        <div class="canvas-card-meta">
+          <span class="canvas-card-strength">${strengthDots}</span>
+          <div class="canvas-card-flavors">${flavorBadges}</div>
         </div>
       </div>`;
   }
 
-  /* ---------- de-overlap ---------- */
+  /* ---------- de-overlap (tuned for cards) ---------- */
 
   function deOverlap(cards) {
-    // Simple iterative push-apart
-    const MIN_DIST = 0.06; // 6% of canvas
-    for (let pass = 0; pass < 8; pass++) {
+    const MIN_X = 0.09;
+    const MIN_Y = 0.07;
+    for (let pass = 0; pass < 12; pass++) {
       for (let i = 0; i < cards.length; i++) {
         for (let j = i + 1; j < cards.length; j++) {
           const dx = cards[j].x - cards[i].x;
           const dy = cards[j].y - cards[i].y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < MIN_DIST && dist > 0) {
-            const push = (MIN_DIST - dist) / 2;
-            const nx = dx / dist;
-            const ny = dy / dist;
-            cards[i].x = clamp(cards[i].x - nx * push, 0.02, 0.98);
-            cards[i].y = clamp(cards[i].y - ny * push, 0.02, 0.98);
-            cards[j].x = clamp(cards[j].x + nx * push, 0.02, 0.98);
-            cards[j].y = clamp(cards[j].y + ny * push, 0.02, 0.98);
-          } else if (dist === 0) {
-            // Identical positions — scatter randomly
-            cards[j].x = clamp(cards[j].x + (Math.random() - 0.5) * 0.08, 0.02, 0.98);
-            cards[j].y = clamp(cards[j].y + (Math.random() - 0.5) * 0.08, 0.02, 0.98);
+          const overlapX = Math.abs(dx) < MIN_X;
+          const overlapY = Math.abs(dy) < MIN_Y;
+          if (overlapX && overlapY) {
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist === 0) {
+              cards[j].x = clamp(cards[j].x + (Math.random() - 0.5) * 0.10, 0.01, 0.92);
+              cards[j].y = clamp(cards[j].y + (Math.random() - 0.5) * 0.08, 0.02, 0.95);
+            } else {
+              const pushX = (MIN_X - Math.abs(dx)) / 2 * Math.sign(dx || 1);
+              const pushY = (MIN_Y - Math.abs(dy)) / 2 * Math.sign(dy || 1);
+              cards[i].x = clamp(cards[i].x - pushX, 0.01, 0.92);
+              cards[i].y = clamp(cards[i].y - pushY, 0.02, 0.95);
+              cards[j].x = clamp(cards[j].x + pushX, 0.01, 0.92);
+              cards[j].y = clamp(cards[j].y + pushY, 0.02, 0.95);
+            }
           }
         }
       }

@@ -632,6 +632,95 @@
   color: var(--coral);
 }
 
+.inv-summary-stat.active[data-summary="restock"] .stat-label {
+  color: var(--turquoise);
+}
+
+/* ===== Restock List ===== */
+.restock-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: var(--space-sm) 0;
+}
+
+.restock-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(232, 197, 71, 0.10);
+  border-radius: var(--radius-md);
+  transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+
+.restock-item:hover {
+  border-color: rgba(37, 217, 190, 0.25);
+  background: rgba(37, 217, 190, 0.04);
+}
+
+.restock-item-main {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-sm);
+  justify-content: space-between;
+}
+
+.restock-item-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.restock-staple {
+  font-size: 0.55rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--turquoise);
+  background: var(--turquoise-dim);
+  padding: 1px 6px;
+  border-radius: var(--radius-pill);
+}
+
+.restock-item-cat {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  flex-shrink: 0;
+}
+
+.restock-item-detail {
+  display: flex;
+  gap: var(--space-lg);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.restock-item-detail strong {
+  color: var(--text-secondary);
+}
+
+.restock-item-have strong {
+  color: var(--coral);
+}
+
+.restock-item-need strong {
+  color: var(--turquoise);
+}
+
+.restock-item-cocktails {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  font-style: italic;
+  line-height: 1.4;
+}
+
 /* ===== Add Recipe Form ===== */
 .add-recipe-form {
   display: flex;

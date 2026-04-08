@@ -3,6 +3,11 @@ const InventoryView = (() => {
 
   const BOTTLE_SIZES = { ml: 700, pcs: 10, g: 200, dash: 30 };
 
+  /* Standard staples — always show on restock list when not in inventory */
+  const STAPLE_INGREDIENTS = [
+    'lemon-juice', 'lime-juice', 'simple-syrup', 'egg-white', 'lime', 'mint'
+  ];
+
   function getBottleSize(item) {
     return item.bottleSize || BOTTLE_SIZES[item.unit] || 700;
   }
@@ -26,8 +31,79 @@ const InventoryView = (() => {
   }
 
   let searchTerm = '';
-  let summaryView = ''; // '' | 'lowstock'
+  let summaryView = ''; // '' | 'lowstock' | 'restock'
   const collapsedCats = new Set();
+
+  /* ---------- Restock calculator ----------
+     Finds ingredients you're SHORT on to make cocktails.
+     Only counts missing amounts, not "running low in general". */
+
+  function buildRestockList(inventory) {
+    const allCocktails = [...COCKTAILS, ...(Storage.getCustomRecipes ? Storage.getCustomRecipes() : [])];
+
+    // Sum available amounts per ingredientId
+    const invMap = {};
+    inventory.forEach(i => {
+      if (!invMap[i.ingredientId]) invMap[i.ingredientId] = 0;
+      invMap[i.ingredientId] += i.amount;
+    });
+
+    // For each cocktail, find which ingredients are short
+    const shortMap = {}; // ingredientId → { needed (total gap), cocktails: Set }
+
+    allCocktails.forEach(cocktail => {
+      if (!cocktail.ingredients) return;
+      cocktail.ingredients.forEach(ing => {
+        const ingredient = getIngredientById(ing.ingredientId);
+        if (ingredient && ingredient.category === 'garnish') return;
+
+        const have = invMap[ing.ingredientId] || 0;
+        if (have < ing.amount) {
+          const gap = ing.amount - have;
+          if (!shortMap[ing.ingredientId]) {
+            shortMap[ing.ingredientId] = { needed: 0, cocktails: new Set() };
+          }
+          shortMap[ing.ingredientId].needed += gap;
+          shortMap[ing.ingredientId].cocktails.add(cocktail.name);
+        }
+      });
+    });
+
+    // Always include staples that are either missing or very low
+    STAPLE_INGREDIENTS.forEach(id => {
+      const have = invMap[id] || 0;
+      const ingredient = getIngredientById(id);
+      if (!ingredient) return;
+      // Consider "low" based on typical usage
+      const threshold = ingredient.defaultUnit === 'pcs' ? 2 : 100;
+      if (have < threshold && !shortMap[id]) {
+        shortMap[id] = { needed: threshold - have, cocktails: new Set(['Staple']) };
+      }
+    });
+
+    // Convert to sorted array
+    const list = Object.entries(shortMap).map(([ingredientId, data]) => {
+      const ingredient = getIngredientById(ingredientId);
+      return {
+        ingredientId,
+        ingredient,
+        needed: data.needed,
+        cocktailCount: data.cocktails.size,
+        cocktailNames: [...data.cocktails].slice(0, 4),
+        isStaple: STAPLE_INGREDIENTS.includes(ingredientId),
+        have: invMap[ingredientId] || 0
+      };
+    }).filter(x => x.ingredient);
+
+    // Sort: most cocktails blocked first, then staples, then by needed amount
+    list.sort((a, b) => {
+      if (b.cocktailCount !== a.cocktailCount) return b.cocktailCount - a.cocktailCount;
+      if (a.isStaple !== b.isStaple) return a.isStaple ? -1 : 1;
+      return b.needed - a.needed;
+    });
+
+    return list;
+  }
 
   function render() {
     const container = document.getElementById('main-content');
@@ -39,13 +115,13 @@ const InventoryView = (() => {
       return ing && bottleCats.includes(ing.category);
     });
 
-    // Restock count (below 50%) and low stock count
-    let restockCount = 0;
+    // Restock count (ingredients SHORT for cocktails) and low stock count
+    const restockList = buildRestockList(inventory);
+    let restockCount = restockList.length;
     let lowCount = 0;
     bottleItems.forEach(item => {
       const bs = getBottleSize(item);
       const pct = getFillPercent(item.amount, bs);
-      if (pct < 50 && pct > 0) restockCount++;
       if (pct <= 25 && pct > 0) lowCount++;
     });
 
@@ -66,7 +142,7 @@ const InventoryView = (() => {
             <div class="stat-number">${bottleItems.length}</div>
             <div class="stat-label">Items</div>
           </div>
-          <div class="inv-summary-stat">
+          <div class="inv-summary-stat clickable${summaryView === 'restock' ? ' active' : ''}" data-summary="restock">
             <div class="stat-number" style="color:var(--turquoise)">${restockCount}</div>
             <div class="stat-label">Restock</div>
           </div>
@@ -144,6 +220,27 @@ const InventoryView = (() => {
   }
 
   function renderCategories(inventory) {
+    // Restock view: ingredients needed to make cocktails
+    if (summaryView === 'restock') {
+      const restockList = buildRestockList(inventory);
+      const filtered = searchTerm
+        ? restockList.filter(r => {
+            const q = searchTerm.toLowerCase();
+            return r.ingredient.name.toLowerCase().includes(q) ||
+                   r.cocktailNames.some(n => n.toLowerCase().includes(q));
+          })
+        : restockList;
+      if (filtered.length === 0) return '<div class="empty-state"><p>Nothing to restock — you can make everything!</p></div>';
+
+      return `
+        <div class="inv-category">
+          <div class="inv-category-label">Restock List <span class="inv-category-count">${filtered.length}</span></div>
+          <div class="restock-list">
+            ${filtered.map(r => renderRestockItem(r)).join('')}
+          </div>
+        </div>`;
+    }
+
     // Low stock summary view: flat sorted list of spirits/liqueurs/syrups
     if (summaryView === 'lowstock') {
       const bottleCats = ['spirit', 'liqueur', 'syrup', 'bitters'];
@@ -249,6 +346,30 @@ const InventoryView = (() => {
       </div>`;
   }
 
+  function renderRestockItem(r) {
+    const unitLabel = r.ingredient.defaultUnit || 'ml';
+    const haveLabel = r.have > 0 ? `${r.have} ${unitLabel}` : 'None';
+    const stapleTag = r.isStaple ? '<span class="restock-staple">Staple</span>' : '';
+    const cocktailList = r.cocktailNames.filter(n => n !== 'Staple');
+    const cocktailLabel = cocktailList.length > 0
+      ? cocktailList.join(', ') + (r.cocktailCount > cocktailList.length ? ` +${r.cocktailCount - cocktailList.length} more` : '')
+      : '';
+    const catLabel = INGREDIENT_CATEGORIES[r.ingredient.category] || r.ingredient.category;
+
+    return `
+      <div class="restock-item">
+        <div class="restock-item-main">
+          <div class="restock-item-name">${r.ingredient.name} ${stapleTag}</div>
+          <div class="restock-item-cat">${catLabel}</div>
+        </div>
+        <div class="restock-item-detail">
+          <div class="restock-item-have">Have: <strong>${haveLabel}</strong></div>
+          <div class="restock-item-need">Need: <strong>~${Math.ceil(r.needed)} ${unitLabel}</strong></div>
+        </div>
+        ${cocktailLabel ? `<div class="restock-item-cocktails">Needed for: ${cocktailLabel}</div>` : ''}
+      </div>`;
+  }
+
   function bindEvents() {
     // Search
     const searchInput = document.getElementById('inv-search');
@@ -265,7 +386,7 @@ const InventoryView = (() => {
       });
     }
 
-    // Summary stat clicks (Items = reset to default, Low Stock = flat sorted view)
+    // Summary stat clicks
     document.querySelectorAll('.inv-summary-stat.clickable').forEach(stat => {
       stat.addEventListener('click', () => {
         const view = stat.dataset.summary;
@@ -273,11 +394,14 @@ const InventoryView = (() => {
           summaryView = '';
         } else if (view === 'lowstock') {
           summaryView = summaryView === 'lowstock' ? '' : 'lowstock';
+        } else if (view === 'restock') {
+          summaryView = summaryView === 'restock' ? '' : 'restock';
         }
         const catContainer = document.getElementById('inv-categories');
         if (catContainer) catContainer.innerHTML = renderCategories(Storage.getInventory());
         document.querySelectorAll('.inv-summary-stat.clickable').forEach(s => {
-          s.classList.toggle('active', s.dataset.summary === 'lowstock' && summaryView === 'lowstock');
+          const sv = s.dataset.summary;
+          s.classList.toggle('active', sv === summaryView);
         });
         rebindItemEvents();
       });
